@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Kobo Quotes</title>
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+html, body {
+  height: 100%;
+  background: #f7f5f2;
+  color: #1a1814;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 15px;
+  -webkit-font-smoothing: antialiased;
+}
+
+.app {
+  max-width: 430px;
+  margin: 0 auto;
+  padding: 0 16px 80px;
+  min-height: 100vh;
+}
+
+/* Topbar */
+.topbar {
+  position: sticky;
+  top: 0;
+  background: #f7f5f2;
+  padding: 16px 16px 12px;
+  margin: 0 -16px;
+  z-index: 20;
+  border-bottom: 1px solid #e8e4de;
+}
+
+.topbar-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.app-title {
+  font-family: 'Lora', serif;
+  font-size: 22px;
+  font-weight: 500;
+  color: #1a1814;
+  letter-spacing: -0.3px;
+}
+
+.count-pill {
+  font-size: 12px;
+  color: #8a8070;
+  background: #edeae4;
+  border-radius: 20px;
+  padding: 3px 10px;
+}
+
+.search-wrap { position: relative; margin-bottom: 8px; }
+.search-wrap input {
+  width: 100%;
+  background: #fff;
+  border: 1px solid #ddd9d2;
+  border-radius: 12px;
+  color: #1a1814;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 16px;
+  padding: 11px 40px 11px 14px;
+  outline: none;
+  -webkit-appearance: none;
+}
+.search-wrap input:focus { border-color: #a09070; }
+.search-wrap input::placeholder { color: #b0a898; }
+
+.clear-btn {
+  position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
+  background: none; border: none; font-size: 20px; line-height: 1;
+  cursor: pointer; color: #a09888; display: none; padding: 2px 4px;
+}
+
+.select-wrap select {
+  width: 100%;
+  background: #fff;
+  border: 1px solid #ddd9d2;
+  border-radius: 12px;
+  color: #1a1814;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 16px;
+  padding: 11px 36px 11px 14px;
+  outline: none;
+  -webkit-appearance: none;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23a09070' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+}
+.select-wrap select:focus { border-color: #a09070; }
+.filter-row { display: flex; gap: 8px; }
+.filter-row .select-wrap { flex: 1; }
+
+/* Color dot on card */
+.card-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 7px; }
+.color-dot { flex-shrink: 0; width: 9px; height: 9px; border-radius: 50%; margin-left: 8px; }
+.color-dot.c0 { background: #f5c842; }
+.color-dot.c1 { background: #e05555; }
+.color-dot.c2 { background: #4a90d9; }
+.color-dot.c3 { background: #9b6dd6; }
+.color-dot.c4 { background: #4caa6e; }
+
+/* Cache bar */
+.cache-bar {
+  display: none;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 16px;
+  background: #edeae4;
+  font-size: 12px;
+  color: #8a8070;
+  margin: 0 -16px;
+}
+.dot {
+  display: inline-block; width: 6px; height: 6px;
+  border-radius: 50%; margin-right: 6px; vertical-align: middle;
+}
+.dot.live { background: #5a9e6f; }
+.dot.cached { background: #b0a898; }
+.cache-bar button {
+  font-size: 12px; color: #6a5e4e;
+  background: none; border: 1px solid #c8c0b4;
+  border-radius: 8px; padding: 4px 10px; cursor: pointer;
+}
+
+/* Connection card */
+.conn-wrap { padding: 24px 0 0; }
+.conn-card {
+  background: #fff;
+  border: 1px solid #e0dcd4;
+  border-radius: 16px;
+  padding: 20px;
+}
+.conn-card label {
+  font-size: 12px; color: #8a8070;
+  text-transform: uppercase; letter-spacing: 0.06em;
+  display: block; margin-bottom: 10px;
+}
+.conn-row { display: flex; gap: 8px; align-items: stretch; }
+.conn-row input {
+  flex: 1;
+  min-width: 0;
+  background: #f7f5f2;
+  border: 1px solid #ddd9d2;
+  border-radius: 10px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 15px;
+  padding: 12px 10px;
+  color: #1a1814;
+  outline: none;
+  -webkit-appearance: none;
+}
+.conn-row input::placeholder { color: #b0a898; font-size: 13px; }
+.conn-row button {
+  flex-shrink: 0;
+  background: #1a1814; color: #f7f5f2;
+  border: none; border-radius: 10px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px; font-weight: 500;
+  padding: 12px 16px; cursor: pointer;
+  white-space: nowrap;
+}
+.conn-row button:active { opacity: 0.8; }
+.conn-hint {
+  margin-top: 12px; font-size: 13px;
+  color: #8a8070; line-height: 1.6;
+}
+.conn-hint a { color: #6a7e5e; cursor: pointer; text-decoration: underline; }
+
+/* Quotes list */
+.quotes-list {
+  padding: 16px 0;
+  display: flex; flex-direction: column; gap: 10px;
+}
+
+.quote-card {
+  background: #fff;
+  border: 1px solid #e8e4de;
+  border-radius: 14px;
+  padding: 16px;
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+.quote-card:active { border-color: #c8c0b4; }
+
+.quote-book {
+  font-size: 11px; color: #a09070;
+  text-transform: uppercase; letter-spacing: 0.07em;
+  margin-bottom: 7px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
+.quote-text {
+  font-family: 'Lora', serif;
+  font-size: 15px; line-height: 1.7;
+  color: #2a2520;
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.quote-text mark {
+  background: #fef3c7;
+  color: #92640a;
+  border-radius: 2px;
+  padding: 0 1px;
+}
+
+.quote-date {
+  margin-top: 9px;
+  font-size: 11px; color: #b0a898;
+}
+
+.empty {
+  text-align: center;
+  padding: 60px 20px;
+  color: #a09888;
+  font-size: 15px;
+  line-height: 1.8;
+}
+
+/* Modal */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: rgba(20, 18, 14, 0.55);
+  align-items: flex-end;
+  justify-content: center;
+}
+.modal-overlay.open { display: flex; }
+
+.modal-sheet {
+  background: #ffffff;
+  border-radius: 20px 20px 0 0;
+  width: 100%;
+  max-width: 430px;
+  max-height: 80vh;
+  overflow-y: auto;
+  padding: 0 20px 44px;
+}
+
+.modal-handle {
+  width: 40px; height: 4px;
+  background: #ddd9d2;
+  border-radius: 2px;
+  margin: 14px auto 20px;
+}
+
+.modal-book {
+  font-size: 11px; color: #a09070;
+  text-transform: uppercase; letter-spacing: 0.07em;
+  margin-bottom: 12px;
+}
+
+.modal-quote {
+  font-family: 'Lora', serif;
+  font-size: 17px; line-height: 1.75;
+  color: #1a1814;
+  border-left: 2px solid #d4cdc2;
+  padding-left: 14px;
+  margin-bottom: 24px;
+}
+
+.modal-actions { display: flex; gap: 10px; }
+
+.btn-primary {
+  flex: 1;
+  background: #1a1814; color: #f7f5f2;
+  border: none; border-radius: 12px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 15px; font-weight: 500;
+  padding: 14px; cursor: pointer;
+}
+.btn-primary:active { opacity: 0.8; }
+
+.btn-secondary {
+  flex: 1;
+  background: #f0ece6; color: #4a4438;
+  border: none; border-radius: 12px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 15px;
+  padding: 14px; cursor: pointer;
+}
+.btn-secondary:active { opacity: 0.8; }
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <div class="topbar" id="topbar" style="display:none">
+    <div class="topbar-title-row">
+      <span class="app-title">Kobo Quotes</span>
+      <span class="count-pill" id="countPill">—</span>
+    </div>
+    <div class="search-wrap">
+      <input type="search" id="searchInput" placeholder="Search quotes…" oninput="applyFilters()" autocorrect="off" spellcheck="false">
+      <button class="clear-btn" id="clearBtn" onclick="clearSearch()">×</button>
+    </div>
+    <div class="filter-row">
+      <div class="select-wrap">
+        <select id="bookSelect" onchange="applyFilters()">
+          <option value="">All books</option>
+        </select>
+      </div>
+      <div class="select-wrap">
+        <select id="colorSelect" onchange="applyFilters()">
+          <option value="">All colors</option>
+          <option value="0">● Yellow</option>
+          <option value="1">● Red</option>
+          <option value="2">● Blue</option>
+          <option value="3">● Purple</option>
+          <option value="4">● Green</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <div class="cache-bar" id="cacheBar">
+    <span id="cacheLabel"></span>
+    <div style="display:flex;gap:6px;">
+      <button onclick="tryReconnect()">Refresh</button>
+      <button onclick="resetApp()" style="color:#b05040;border-color:#e0c0b8;">Reset</button>
+    </div>
+  </div>
+
+  <div class="conn-wrap" id="connWrap">
+    <div class="conn-card">
+      <label>Connect to Kobo</label>
+      <div class="conn-row">
+        <div style="flex:1;min-width:0;position:relative;">
+          <input type="text" id="koboIp" autocomplete="off" autocorrect="off" inputmode="numeric"
+            style="width:100%;padding-right:10px;"
+            placeholder="10.0.0"
+            oninput="updateSuffix()">
+          <span id="ipSuffix" style="
+            position:absolute;top:50%;right:10px;transform:translateY(-50%);
+            font-family:'DM Sans',sans-serif;font-size:15px;
+            color:#b0a898;pointer-events:none;white-space:nowrap;
+          ">.166:8080</span>
+        </div>
+        <button onclick="fetchFromKobo()">Connect</button>
+      </div>
+      <div style="margin-top:8px;">
+        <button id="scanBtn" onclick="scanForKobo()" style="
+          width:100%;background:#f0ece6;color:#4a4438;
+          border:1px solid #ddd9d2;border-radius:10px;
+          font-family:'DM Sans',sans-serif;font-size:14px;
+          padding:11px;cursor:pointer;
+        ">Auto-scan for Kobo</button>
+      </div>
+      <div class="conn-hint" id="connHint">
+        Enter the first part of your Kobo's IP, or tap scan.<br>
+        <a onclick="loadDemo()">Load demo data instead →</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="quotes-list" id="quotesList"></div>
+</div>
+
+<!-- Modal bottom sheet -->
+<div class="modal-overlay" id="modalOverlay" onclick="handleOverlayTap(event)">
+  <div class="modal-sheet" id="modalSheet">
+    <div class="modal-handle"></div>
+    <div class="modal-book" id="mBook"></div>
+    <div class="modal-quote" id="mQuote"></div>
+    <div class="modal-actions">
+      <button class="btn-primary" id="copyBtn" onclick="copyQuote()">Copy quote</button>
+      <button class="btn-secondary" onclick="closeModal()">Close</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const STORAGE_KEY = 'kobo_quotes_v3';
+const IP_KEY = 'kobo_ip_v3';
+let allQuotes = [], filtered = [], currentQuote = null;
+
+const DEMO = [
+  { text: "I must not fear. Fear is the mind-killer. Fear is the little-death that brings total obliteration.", book: "Dune", date: "2024-10-12", color: 0 },
+  { text: "The mystery of life isn't a problem to solve, but a reality to experience.", book: "Dune", date: "2024-10-14", color: 2 },
+  { text: "You have power over your mind, not outside events. Realize this, and you will find strength.", book: "Meditations", date: "2024-11-03", color: 1 },
+  { text: "The impediment to action advances action. What stands in the way becomes the way.", book: "Meditations", date: "2024-11-05", color: 0 },
+  { text: "Waste no more time arguing about what a good man should be. Be one.", book: "Meditations", date: "2024-11-07", color: 3 },
+  { text: "Nothing in life is as important as you think it is, while you are thinking about it.", book: "Thinking, Fast and Slow", date: "2024-09-20", color: 4 },
+  { text: "A reliable way to make people believe in falsehoods is frequent repetition, because familiarity is not easily distinguished from truth.", book: "Thinking, Fast and Slow", date: "2024-09-22", color: 2 },
+  { text: "Reading is faster than listening. Doing is faster than watching.", book: "Naval Ravikant", date: "2024-08-15", color: 1 },
+];
+
+const IP_SUFFIX = '.166:8080';
+const SUBNETS_KEY = 'kobo_known_subnets';
+
+function getLearnedSubnets() {
+  try { return JSON.parse(localStorage.getItem(SUBNETS_KEY)) || []; } catch { return []; }
+}
+
+function saveSubnet(subnet) {
+  const learned = getLearnedSubnets();
+  if (!learned.includes(subnet)) {
+    learned.unshift(subnet); // most recent first
+    localStorage.setItem(SUBNETS_KEY, JSON.stringify(learned));
+  }
+}
+
+function getAllSubnets() {
+  const learned = getLearnedSubnets();
+  const merged = [...new Set([...learned, ...SCAN_SUBNETS])];
+  return merged;
+}
+
+function updateSuffix() {
+  const val = document.getElementById('koboIp').value;
+  const suffix = document.getElementById('ipSuffix');
+  suffix.style.display = val.includes(':') ? 'none' : 'inline';
+}
+
+function getFullIp() {
+  const val = document.getElementById('koboIp').value.trim();
+  if (!val) return '';
+  if (val.includes(':')) return val;
+  return val + IP_SUFFIX;
+}
+
+function resetApp() {
+  localStorage.removeItem(IP_KEY);
+  localStorage.removeItem(STORAGE_KEY);
+  // SUBNETS_KEY is intentionally NOT removed
+  document.getElementById('koboIp').value = '';
+  document.getElementById('ipSuffix').style.display = 'inline';
+  document.getElementById('connHint').innerHTML = 'Enter the first part of your Kobo\'s IP.<br><a onclick="loadDemo()">Load demo data instead →</a>';
+  document.getElementById('topbar').style.display = 'none';
+  document.getElementById('cacheBar').style.display = 'none';
+  document.getElementById('connWrap').style.display = 'block';
+  document.getElementById('quotesList').innerHTML = '';
+  allQuotes = []; filtered = [];
+}
+
+function loadDemo() {
+  ingest(DEMO, false);
+  document.getElementById('connWrap').style.display = 'none';
+}
+
+async function fetchFromKobo() {
+  const raw = getFullIp();
+  if (!raw) return;
+  const base = raw.startsWith('http') ? raw : 'http://' + raw;
+  const url = base.replace(/\/$/, '') + '/annotations.json';
+  const hint = document.getElementById('connHint');
+  hint.textContent = 'Connecting…';
+  try {
+    const res = await fetch(url, { signal: AbortSignal.timeout(6000) });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.json();
+    localStorage.setItem(IP_KEY, raw);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    // Learn this subnet for future scans
+    const subnet = raw.replace(IP_SUFFIX, '').replace(/:\d+$/, '');
+    saveSubnet(subnet);
+    document.getElementById('connWrap').style.display = 'none';
+    ingest(data, true);
+  } catch(e) {
+    hint.innerHTML = '<span style="color:#b05040">Could not connect: ' + e.message + '</span><br><a onclick="loadDemo()">Load demo data →</a>';
+  }
+}
+
+const SCAN_SUBNETS = [
+  '10.0.0',
+  '192.168.43',
+  '172.20.10',
+  '192.168.1',
+  '10.42.0',
+];
+
+const NTFY_TOPIC = 'kobo-bg-f33434ce92b0ff19';
+
+async function fetchIPFromNtfy() {
+  try {
+    const res = await fetch(`https://ntfy.sh/${NTFY_TOPIC}/json?poll=1`, {
+      signal: AbortSignal.timeout(4000)
+    });
+    const text = await res.text();
+    // ntfy returns one JSON object per line — get the last one
+    const lines = text.trim().split('\n').filter(Boolean);
+    if (!lines.length) return null;
+    const last = JSON.parse(lines[lines.length - 1]);
+    const msg = JSON.parse(last.message);
+    if (msg.ip) return msg.ip + ':8080';
+  } catch(e) {}
+  return null;
+}
+
+async function tryUrl(url) {
+  try {
+    const res = await fetch(url, { signal: AbortSignal.timeout(2500) });
+    if (!res.ok) throw new Error();
+    const data = await res.json();
+    return { url, data };
+  } catch(e) {
+    return null;
+  }
+}
+
+async function scanForKobo() {
+  const btn = document.getElementById('scanBtn');
+  const hint = document.getElementById('connHint');
+  btn.textContent = 'Scanning…';
+  btn.disabled = true;
+
+  // Step 1 — try ntfy first
+  hint.textContent = 'Checking last known IP…';
+  const ntfyIp = await fetchIPFromNtfy();
+  if (ntfyIp) {
+    const url = `http://${ntfyIp}/annotations.json`;
+    const result = await tryUrl(url);
+    if (result) {
+      const fullIp = ntfyIp;
+      const subnet = ntfyIp.replace(IP_SUFFIX, '');
+      localStorage.setItem(IP_KEY, fullIp);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(result.data));
+      saveSubnet(subnet);
+      document.getElementById('koboIp').value = subnet;
+      updateSuffix();
+      document.getElementById('connWrap').style.display = 'none';
+      btn.textContent = 'Auto-scan for Kobo';
+      btn.disabled = false;
+      ingest(result.data, true);
+      return;
+    }
+  }
+
+  // Step 2 — fallback to subnet scan
+  const subnets = getAllSubnets();
+  hint.textContent = `Trying ${subnets.length} subnet${subnets.length !== 1 ? 's' : ''} in parallel…`;
+  const candidates = subnets.map(s => `http://${s}.166:8080/annotations.json`);
+  const results = await Promise.all(candidates.map(tryUrl));
+  const match = results.find(r => r !== null);
+
+  btn.textContent = 'Auto-scan for Kobo';
+  btn.disabled = false;
+
+  if (match) {
+    const subnet = match.url.replace('http://', '').replace('.166:8080/annotations.json', '');
+    const fullIp = subnet + '.166:8080';
+    localStorage.setItem(IP_KEY, fullIp);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(match.data));
+    saveSubnet(subnet);
+    document.getElementById('koboIp').value = subnet;
+    updateSuffix();
+    document.getElementById('connWrap').style.display = 'none';
+    ingest(match.data, true);
+  } else {
+    hint.innerHTML = '<span style="color:#b05040">Kobo not found on any known subnet.</span><br>Enter the IP manually or <a onclick="loadDemo()">load demo →</a>';
+  }
+}
+
+async function tryReconnect() {
+  // Step 1 — try ntfy for fresh IP
+  const ntfyIp = await fetchIPFromNtfy();
+  if (ntfyIp) {
+    const url = `http://${ntfyIp}/annotations.json`;
+    const result = await tryUrl(url);
+    if (result) {
+      const subnet = ntfyIp.replace(IP_SUFFIX, '');
+      localStorage.setItem(IP_KEY, ntfyIp);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(result.data));
+      saveSubnet(subnet);
+      document.getElementById('koboIp').value = subnet;
+      updateSuffix();
+      ingest(result.data, true);
+      return;
+    }
+  }
+
+  // Step 2 — try saved IP
+  const raw = localStorage.getItem(IP_KEY);
+  if (raw) {
+    const base = raw.startsWith('http') ? raw : 'http://' + raw;
+    const url = base.replace(/\/$/, '') + '/annotations.json';
+    try {
+      const res = await fetch(url, { signal: AbortSignal.timeout(4000) });
+      if (!res.ok) throw new Error();
+      const data = await res.json();
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+      ingest(data, true);
+      return;
+    } catch(e) {}
+  }
+
+  // Step 3 — subnet scan fallback
+  const subnets = getAllSubnets();
+  const candidates = subnets.map(s => `http://${s}.166:8080/annotations.json`);
+  const results = await Promise.all(candidates.map(tryUrl));
+  const match = results.find(r => r !== null);
+  if (match) {
+    const subnet = match.url.replace('http://', '').replace('.166:8080/annotations.json', '');
+    const fullIp = subnet + '.166:8080';
+    localStorage.setItem(IP_KEY, fullIp);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(match.data));
+    saveSubnet(subnet);
+    document.getElementById('koboIp').value = subnet;
+    updateSuffix();
+    ingest(match.data, true);
+  }
+}
+
+function ingest(data, live) {
+  allQuotes = data.map((q,i) => ({
+    id: i,
+    text: q.text || q.Text || '',
+    book: cleanBook(q.book || q.VolumeID || q.title || 'Unknown'),
+    date: q.date || q.DateCreated || '',
+    color: q.color != null ? q.color : (q.Color != null ? q.Color : -1),
+  })).filter(q => q.text.trim());
+  buildDropdown();
+  applyFilters();
+  document.getElementById('topbar').style.display = 'block';
+  const bar = document.getElementById('cacheBar');
+  bar.style.display = 'flex';
+  document.getElementById('cacheLabel').innerHTML = live
+    ? '<span class="dot live"></span>Live from Kobo'
+    : '<span class="dot cached"></span>Showing cached data';
+}
+
+function cleanBook(v) {
+  if (!v) return 'Unknown';
+  const p = v.split('/'); let n = p[p.length-1];
+  return n.replace(/\.(epub|mobi|pdf|azw3?)$/i,'') || v;
+}
+
+function buildDropdown() {
+  const sel = document.getElementById('bookSelect');
+  const books = [...new Set(allQuotes.map(q => q.book))].sort();
+  sel.innerHTML = '<option value="">All books</option>';
+  books.forEach(b => { const o = document.createElement('option'); o.value=b; o.textContent=b; sel.appendChild(o); });
+}
+
+function applyFilters() {
+  const q = document.getElementById('searchInput').value.trim().toLowerCase();
+  const book = document.getElementById('bookSelect').value;
+  const color = document.getElementById('colorSelect').value;
+  document.getElementById('clearBtn').style.display = q ? 'block' : 'none';
+  filtered = allQuotes.filter(item =>
+    (!book || item.book === book) &&
+    (color === '' || item.color === parseInt(color)) &&
+    (!q || item.text.toLowerCase().includes(q) || item.book.toLowerCase().includes(q))
+  );
+  render(q);
+  document.getElementById('countPill').textContent = filtered.length + (filtered.length === 1 ? ' quote' : ' quotes');
+}
+
+function render(query) {
+  const list = document.getElementById('quotesList');
+  if (!filtered.length) {
+    list.innerHTML = '<div class="empty">No quotes found.<br>Try a different search.</div>';
+    return;
+  }
+  list.innerHTML = '';
+  filtered.forEach(q => {
+    const card = document.createElement('div');
+    card.className = 'quote-card';
+    card.innerHTML = `
+      <div class="card-top">
+        <div class="quote-book">${esc(q.book)}</div>
+        ${q.color >= 0 ? `<span class="color-dot c${q.color}"></span>` : ''}
+      </div>
+      <div class="quote-text">${hilite(esc(q.text), query)}</div>
+      ${q.date ? `<div class="quote-date">${fmt(q.date)}</div>` : ''}
+    `;
+    card.onclick = () => openModal(q);
+    list.appendChild(card);
+  });
+}
+
+function hilite(t, q) {
+  if (!q) return t;
+  return t.replace(new RegExp('('+q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')','gi'),'<mark>$1</mark>');
+}
+function esc(s) { return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function fmt(d) { try { return new Date(d).toLocaleDateString('en-CA',{year:'numeric',month:'short',day:'numeric'}); } catch { return d; } }
+function clearSearch() { document.getElementById('searchInput').value=''; applyFilters(); }
+
+function openModal(q) {
+  currentQuote = q;
+  document.getElementById('mBook').textContent = q.book;
+  document.getElementById('mQuote').textContent = q.text;
+  document.getElementById('modalOverlay').classList.add('open');
+}
+function handleOverlayTap(e) {
+  if (e.target === document.getElementById('modalOverlay')) closeModal();
+}
+function closeModal() { document.getElementById('modalOverlay').classList.remove('open'); }
+function copyQuote() {
+  if (!currentQuote) return;
+  navigator.clipboard.writeText('"' + currentQuote.text + '"\n— ' + currentQuote.book).then(() => {
+    const btn = document.getElementById('copyBtn');
+    btn.textContent = 'Copied!';
+    setTimeout(() => btn.textContent = 'Copy quote', 1500);
+  });
+}
+
+const savedIp = localStorage.getItem(IP_KEY);
+if (savedIp) {
+  // Show only the prefix part in the field (strip suffix if present)
+  const prefix = savedIp.replace(IP_SUFFIX, '');
+  document.getElementById('koboIp').value = prefix;
+  updateSuffix();
+}
+const cached = localStorage.getItem(STORAGE_KEY);
+if (cached) {
+  try {
+    ingest(JSON.parse(cached), false);
+    document.getElementById('connWrap').style.display = 'none';
+    tryReconnect();
+  } catch(e) {}
+}
+document.getElementById('koboIp').addEventListener('keydown', e => { if (e.key==='Enter') fetchFromKobo(); });
+</script>
+</body>
+</html>
