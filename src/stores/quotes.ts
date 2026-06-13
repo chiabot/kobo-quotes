@@ -262,7 +262,7 @@ export const useQuotesStore = defineStore("quotes", () => {
       // Each line is a JSON event, take the last one
       const lines = text.trim().split("\n").filter(Boolean);
       if (!lines.length) return null;
-      const last = JSON.parse(lines[lines.length - 1]);
+      const last = JSON.parse(lines[lines.length - 1]!);
       const msg = JSON.parse(last.message);
       if (msg.ip) return msg.ip + ":8080";
       return null;
