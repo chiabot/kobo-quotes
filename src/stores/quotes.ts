@@ -92,8 +92,8 @@ export const useQuotesStore = defineStore("quotes", () => {
   function cleanBook(v: string): string {
     if (!v) return "Unknown";
     const parts = v.split("/");
-    let name = parts[parts.length - 1];
-    name = name.replace(/\.(epub|mobi|pdf|azw3?)$/i, "");
+    let name = parts[parts.length - 1] ?? "";
+    name = name.replace(/\.(epub|mobi|pdf|azw3|kepub?)$/i, "");
     return name || v;
   }
 
