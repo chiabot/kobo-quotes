@@ -41,11 +41,20 @@
 
             <!-- Quote text -->
             <div
-              class="mx-5 mb-5 pl-4 border-l-2 text-stone-800"
+              class="mx-5 mb-2 pl-4 border-l-2 text-stone-800"
               :class="quoteClass"
             >
               {{ quote.text }}
             </div>
+
+            <!-- Author attribution -->
+            <p
+              v-if="quote.author"
+              class="mx-5 mb-5 text-right text-[13px] text-stone-400 italic tracking-wide"
+            >
+              — {{ quote.author }}
+            </p>
+            <div v-else class="mb-5" />
 
             <!-- Action item: done toggle -->
             <div v-if="quote.color === 1" class="flex items-center gap-3 mx-5 mb-5">
