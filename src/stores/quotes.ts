@@ -93,7 +93,7 @@ export const useQuotesStore = defineStore("quotes", () => {
     if (!v) return "Unknown";
     const parts = v.split("/");
     let name = parts[parts.length - 1] ?? "";
-    name = name.replace(/\.(epub|mobi|pdf|azw3?)$/i, "");
+    name = name.replace(/\.(epub|mobi|pdf|azw3|kepub?)$/i, "");
     return name || v;
   }
 

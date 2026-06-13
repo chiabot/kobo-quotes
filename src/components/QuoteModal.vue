@@ -30,7 +30,7 @@
               </div>
               <div class="flex-1 min-w-0">
                 <p class="text-[11px] text-stone-400 uppercase tracking-widest mb-1 truncate">
-                  {{ quote.book }}{{ quote.author ? ` — ${quote.author}` : '' }}
+                  {{ quote.book }}
                 </p>
                 <p
                   v-if="quote.bookProgress"
