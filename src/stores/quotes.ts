@@ -93,7 +93,7 @@ export const useQuotesStore = defineStore("quotes", () => {
     if (!v) return "Unknown";
     const parts = v.split("/");
     let name = parts[parts.length - 1] ?? "";
-    name = name.replace(/\.(epub|mobi|pdf|azw3|kepub?)$/i, "");
+    name = name.replace(/\.(epub|mobi|pdf|azw3?)$/i, "");
     return name || v;
   }
 
@@ -250,9 +250,53 @@ export const useQuotesStore = defineStore("quotes", () => {
     }
   }
 
+  const NTFY_TOPIC = "kobo-bg-f33434ce92b0ff19";
+
+  async function fetchIpFromNtfy(): Promise<string | null> {
+    try {
+      const res = await fetch(`https://ntfy.sh/${NTFY_TOPIC}/json?poll=1`, {
+        signal: AbortSignal.timeout(5000),
+      });
+      if (!res.ok) return null;
+      const text = await res.text();
+      // Each line is a JSON event, take the last one
+      const lines = text.trim().split("\n").filter(Boolean);
+      if (!lines.length) return null;
+      const last = JSON.parse(lines[lines.length - 1]);
+      const msg = JSON.parse(last.message);
+      if (msg.ip) return msg.ip + ":8080";
+      return null;
+    } catch {
+      return null;
+    }
+  }
+
   async function scan() {
     isLoading.value = true;
     connError.value = "";
+
+    // Try ntfy first — fastest path
+    const ntfyIp = await fetchIpFromNtfy();
+    if (ntfyIp) {
+      const url = `http://${ntfyIp}/annotations.json`;
+      const result = await tryUrl(url);
+      if (result) {
+        const subnet = ntfyIp
+          .replace(":8080", "")
+          .split(".")
+          .slice(0, 3)
+          .join(".");
+        const fullIp = ntfyIp;
+        localStorage.setItem(IP_KEY, fullIp);
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(result.data));
+        saveSubnet(subnet);
+        isLoading.value = false;
+        ingest(result.data, true);
+        return;
+      }
+    }
+
+    // Fallback — scan known subnets in parallel
     const subnets = getAllSubnets();
     const candidates = subnets.map(
       (s) => `http://${s}${IP_SUFFIX}/annotations.json`,
@@ -271,7 +315,8 @@ export const useQuotesStore = defineStore("quotes", () => {
       saveSubnet(subnet);
       ingest(match.data, true);
     } else {
-      connError.value = "Kobo not found on any known subnet";
+      connError.value =
+        "Kobo not found. Make sure it is connected to the same network.";
     }
   }
 
@@ -287,7 +332,24 @@ export const useQuotesStore = defineStore("quotes", () => {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
       ingest(data, true);
     } catch {
-      // Silent fallback — try scan
+      // Try ntfy first
+      const ntfyIp = await fetchIpFromNtfy();
+      if (ntfyIp) {
+        const result = await tryUrl(`http://${ntfyIp}/annotations.json`);
+        if (result) {
+          const subnet = ntfyIp
+            .replace(":8080", "")
+            .split(".")
+            .slice(0, 3)
+            .join(".");
+          localStorage.setItem(IP_KEY, ntfyIp);
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(result.data));
+          saveSubnet(subnet);
+          ingest(result.data, true);
+          return;
+        }
+      }
+      // Fallback — scan known subnets
       const subnets = getAllSubnets();
       const candidates = subnets.map(
         (s) => `http://${s}${IP_SUFFIX}/annotations.json`,
