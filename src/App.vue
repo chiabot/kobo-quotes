@@ -62,7 +62,11 @@
       :is-online="isOnline"
       @close="closeModal"
       @navigate="navigateModal"
+      @navigate-to-quote="navigateToQuote"
+      @open-picker="openPicker"
     />
+
+    <GroupPickerModal :quote="pickerQuote" @close="pickerQuote = null" />
 
   </div>
 </template>
@@ -74,6 +78,7 @@ import ConnectPanel from '@/components/ConnectPanel.vue'
 import TopBar from '@/components/TopBar.vue'
 import QuoteCard from '@/components/QuoteCard.vue'
 import QuoteModal from '@/components/QuoteModal.vue'
+import GroupPickerModal from '@/components/GroupPickerModal.vue'
 
 const store = useQuotesStore()
 
@@ -97,6 +102,20 @@ function navigateModal(direction: number) {
   if (next >= 0 && next < store.filtered.length) {
     modalIndex.value = next
   }
+}
+
+// Jumps the modal to a different quote by bookmarkId — used by the group
+// section to navigate to a master or a linked quote.
+function navigateToQuote(bookmarkId: string) {
+  const idx = store.filtered.findIndex(q => q.bookmarkId === bookmarkId)
+  if (idx >= 0) modalIndex.value = idx
+}
+
+// ── Group picker state ──────────────────────────────────────
+const pickerQuote = ref<Quote | null>(null)
+
+function openPicker() {
+  pickerQuote.value = modalQuote.value
 }
 
 // ── Online check ───────────────────────────────────────────

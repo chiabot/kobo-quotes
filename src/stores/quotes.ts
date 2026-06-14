@@ -16,6 +16,8 @@ export interface Quote {
   annotation: string;
   chapterProgress: number;
   chapterTitle: string;
+  tags: string[];
+  attachedImage: string;
 }
 
 export const COLOR_MAP: Record<string, string> = {
@@ -93,7 +95,7 @@ export const useQuotesStore = defineStore("quotes", () => {
     if (!v) return "Unknown";
     const parts = v.split("/");
     let name = parts[parts.length - 1] ?? "";
-    name = name.replace(/\.(epub|mobi|pdf|azw3|kepub?)$/i, "");
+    name = name.replace(/\.(epub|mobi|pdf|azw3?)$/i, "");
     return name || v;
   }
 
@@ -161,6 +163,8 @@ export const useQuotesStore = defineStore("quotes", () => {
         annotation: q.annotation || q.Annotation || "",
         chapterProgress: q.chapter_progress || 0,
         chapterTitle: q.chapter_title || "",
+        tags: q.tags || [],
+        attachedImage: q.attached_image || "",
       }))
       .filter((q: any) => q.text.trim());
 
@@ -261,8 +265,9 @@ export const useQuotesStore = defineStore("quotes", () => {
       const text = await res.text();
       // Each line is a JSON event, take the last one
       const lines = text.trim().split("\n").filter(Boolean);
-      if (!lines.length) return null;
-      const last = JSON.parse(lines[lines.length - 1]!);
+      const lastLine = lines[lines.length - 1];
+      if (!lastLine) return null;
+      const last = JSON.parse(lastLine);
       const msg = JSON.parse(last.message);
       if (msg.ip) return msg.ip + ":8080";
       return null;
@@ -448,6 +453,7 @@ export const useQuotesStore = defineStore("quotes", () => {
     getCachedCover,
     coverUrl,
     getFullIp,
+    getBaseUrl,
     COLOR_MAP,
     COLOR_NAMES,
     IP_SUFFIX,

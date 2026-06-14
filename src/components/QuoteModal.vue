@@ -85,6 +85,13 @@
               <p class="text-[14px] text-stone-700 italic leading-relaxed">{{ quote.annotation }}</p>
             </div>
 
+            <!-- Group section: links to / from other quotes and context snippets -->
+            <GroupSection
+              :quote="quote"
+              @navigate="onNavigateToQuote"
+              @open-picker="emit('open-picker')"
+            />
+
             <!-- Reclassify (online only) -->
             <div v-if="isOnline" class="mx-5 mb-5 pt-4 border-t border-stone-100">
               <p class="text-[11px] text-stone-400 uppercase tracking-widest mb-3">Reclassify</p>
@@ -99,6 +106,32 @@
                   @click="reassign(Number(val))"
                 />
               </div>
+            </div>
+
+            <!-- Edit toggle -->
+            <div class="flex justify-center px-5 pt-2.5 pb-1 border-t border-stone-100">
+              <button
+                class="text-[12px] rounded-full px-4 py-1.5 transition-colors"
+                :class="editMode ? 'bg-stone-100 text-stone-900' : 'text-stone-400'"
+                @click="toggleEdit"
+              >{{ editToggleLabel }}</button>
+            </div>
+
+            <div v-if="editMode">
+              <!-- Tabs -->
+              <div class="flex gap-1 px-5 mb-3.5 border-b border-stone-100">
+                <button
+                  v-for="t in tabs"
+                  :key="t.id"
+                  class="flex-1 py-2.5 text-[13px] font-medium border-b-2 transition-colors"
+                  :class="activeTab === t.id ? 'text-stone-900 border-stone-900' : 'text-stone-400 border-transparent'"
+                  @click="activeTab = t.id"
+                >{{ t.label }}</button>
+              </div>
+
+              <ContextTab v-if="activeTab === 'context'" :quote="quote" />
+              <ImagesTab v-else-if="activeTab === 'images'" :quote="quote" />
+              <TagsTab v-else-if="activeTab === 'tags'" :quote="quote" />
             </div>
 
             <!-- Actions row -->
@@ -138,6 +171,10 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
 import { useQuotesStore, type Quote } from '@/stores/quotes'
+import GroupSection from '@/components/GroupSection.vue'
+import ContextTab from '@/components/ContextTab.vue'
+import ImagesTab from '@/components/ImagesTab.vue'
+import TagsTab from '@/components/TagsTab.vue'
 
 const props = defineProps<{
   quote: Quote | null
@@ -149,14 +186,50 @@ const props = defineProps<{
 const emit = defineEmits<{
   close: []
   navigate: [direction: number]
+  'navigate-to-quote': [bookmarkId: string]
+  'open-picker': []
 }>()
 
 const store = useQuotesStore()
 const copied = ref(false)
 const coverError = ref(false)
 
-// Reset cover error when quote changes
-watch(() => props.quote, () => { coverError.value = false })
+// ── Edit mode + tabs ─────────────────────────────────────
+const editMode = ref(false)
+const connectHint = ref(false)
+const activeTab = ref<'context' | 'images' | 'tags'>('context')
+
+const tabs = [
+  { id: 'context' as const, label: 'Context' },
+  { id: 'images' as const, label: 'Images' },
+  { id: 'tags' as const, label: 'Tags' },
+]
+
+const editToggleLabel = computed(() => {
+  if (connectHint.value) return 'Connect to Kobo to edit'
+  return editMode.value ? '✕ Done editing' : '✏️ Edit'
+})
+
+function toggleEdit() {
+  if (!props.isOnline) {
+    connectHint.value = true
+    setTimeout(() => { connectHint.value = false }, 1800)
+    return
+  }
+  editMode.value = !editMode.value
+}
+
+function onNavigateToQuote(bookmarkId: string) {
+  emit('navigate-to-quote', bookmarkId)
+}
+
+// Reset cover error and edit/tab state when quote changes
+watch(() => props.quote, () => {
+  coverError.value = false
+  editMode.value = false
+  connectHint.value = false
+  activeTab.value = 'context'
+})
 
 const coverSrc = computed(() => {
   if (!props.quote || coverError.value) return null
