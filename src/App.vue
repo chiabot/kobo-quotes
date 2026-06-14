@@ -35,18 +35,19 @@
       <div class="px-4 pt-3 flex flex-col gap-2.5">
         <TransitionGroup name="list">
           <QuoteCard
-            v-for="(quote, idx) in store.filtered"
+            v-for="(quote, idx) in visibleQuotes"
             :key="quote.bookmarkId || quote.id"
             :quote="quote"
             :idx="idx"
             :search-query="store.searchQuery"
-            @open="openModal(idx)"
+            @open="openModal(quote)"
+            @group-view="openGroupView"
           />
         </TransitionGroup>
 
         <!-- Empty state -->
         <div
-          v-if="store.filtered.length === 0"
+          v-if="visibleQuotes.length === 0"
           class="text-center py-16 text-stone-400 text-[15px] leading-relaxed"
         >
           No quotes found.<br>Try a different search.
@@ -68,19 +69,30 @@
 
     <GroupPickerModal :quote="pickerQuote" @close="pickerQuote = null" />
 
+    <GroupViewModal :master-id="groupViewMasterId" @close="groupViewMasterId = null" @navigate="navigateToQuote" />
+
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useQuotesStore, type Quote } from '@/stores/quotes'
+import { useGroupsStore } from '@/stores/groups'
 import ConnectPanel from '@/components/ConnectPanel.vue'
 import TopBar from '@/components/TopBar.vue'
 import QuoteCard from '@/components/QuoteCard.vue'
 import QuoteModal from '@/components/QuoteModal.vue'
 import GroupPickerModal from '@/components/GroupPickerModal.vue'
+import GroupViewModal from '@/components/GroupViewModal.vue'
 
 const store = useQuotesStore()
+const groupsStore = useGroupsStore()
+
+// Quotes that are members of a group are hidden from the main list —
+// only their master shows there, with a 🔗 N badge.
+const visibleQuotes = computed(() =>
+  store.filtered.filter(q => !groupsStore.allMemberIds.has(q.bookmarkId))
+)
 
 // ── Modal state ────────────────────────────────────────────
 const modalIndex = ref(-1)
@@ -89,8 +101,9 @@ const modalQuote = computed<Quote | null>(() =>
   modalIndex.value >= 0 ? store.filtered[modalIndex.value] ?? null : null
 )
 
-function openModal(idx: number) {
-  modalIndex.value = idx
+function openModal(quote: Quote) {
+  const idx = store.filtered.findIndex(q => q.bookmarkId === quote.bookmarkId)
+  if (idx >= 0) modalIndex.value = idx
 }
 
 function closeModal() {
@@ -105,7 +118,8 @@ function navigateModal(direction: number) {
 }
 
 // Jumps the modal to a different quote by bookmarkId — used by the group
-// section to navigate to a master or a linked quote.
+// section and group view to navigate to a master or a linked quote, even
+// if that quote is currently hidden from the main list as a member.
 function navigateToQuote(bookmarkId: string) {
   const idx = store.filtered.findIndex(q => q.bookmarkId === bookmarkId)
   if (idx >= 0) modalIndex.value = idx
@@ -116,6 +130,13 @@ const pickerQuote = ref<Quote | null>(null)
 
 function openPicker() {
   pickerQuote.value = modalQuote.value
+}
+
+// ── Group view state ──────────────────────────────────────
+const groupViewMasterId = ref<string | null>(null)
+
+function openGroupView(bookmarkId: string) {
+  groupViewMasterId.value = bookmarkId
 }
 
 // ── Online check ───────────────────────────────────────────

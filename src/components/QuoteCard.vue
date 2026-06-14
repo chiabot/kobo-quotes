@@ -21,11 +21,19 @@
       v-html="highlighted"
     />
 
-    <!-- Bottom row: date -->
-    <div class="flex items-center justify-between mt-2">
+    <!-- Bottom row: date + image/group indicators -->
+    <div class="flex items-center justify-between mt-2 gap-2">
       <span v-if="quote.date" class="text-[11px] text-stone-300">
         {{ formatDate(quote.date) }}
       </span>
+      <div class="flex items-center gap-1.5 ml-auto">
+        <span v-if="quote.attachedImage" class="text-[12px]" title="Image attached">🖼️</span>
+        <button
+          v-if="memberCount > 0"
+          class="text-[11px] text-stone-500 bg-stone-50 border border-stone-200 rounded-full px-2 py-0.5 active:bg-stone-100"
+          @click.stop="emit('group-view', quote.bookmarkId)"
+        >🔗 {{ memberCount }}</button>
+      </div>
     </div>
   </div>
 </template>
@@ -33,6 +41,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useQuotesStore, type Quote } from '@/stores/quotes'
+import { useGroupsStore } from '@/stores/groups'
 
 const props = defineProps<{
   quote: Quote
@@ -42,9 +51,13 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   open: [quote: Quote]
+  'group-view': [bookmarkId: string]
 }>()
 
 const store = useQuotesStore()
+const groupsStore = useGroupsStore()
+
+const memberCount = computed(() => groupsStore.getGroupMembers(props.quote.bookmarkId).length)
 
 const colorDot = computed(() =>
   props.quote.color >= 0 ? store.COLOR_MAP[String(props.quote.color)] ?? null : null
