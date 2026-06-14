@@ -36,7 +36,7 @@
 
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue'
-import { useQuoteContext } from '@/composables/UseQuoteContext'
+import { useQuoteContext } from '@/composables/UseQuoteContext.ts'
 import { useGroupsStore } from '@/stores/groups'
 import type { Quote } from '@/stores/quotes'
 

@@ -52,7 +52,7 @@
 import { computed, ref, watch } from 'vue'
 import { useGroupsStore, type GroupMember } from '@/stores/groups'
 import { useQuotesStore } from '@/stores/quotes'
-import { useQuoteContext } from '@/composables/useQuoteContext'
+import { useQuoteContext } from '@/composables/UseQuoteContext.ts'
 
 const props = defineProps<{ masterId: string | null }>()
 const emit = defineEmits<{
