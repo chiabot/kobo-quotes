@@ -76,8 +76,8 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
-import { useQuotesStore, type Quote } from '@/stores/quotes'
-import { useGroupsStore } from '@/stores/groups'
+import { useQuotesStore, type Quote } from '@/stores/quotes.ts'
+import { useGroupsStore } from '@/stores/groups.ts'
 import ConnectPanel from '@/components/ConnectPanel.vue'
 import TopBar from '@/components/TopBar.vue'
 import QuoteCard from '@/components/QuoteCard.vue'

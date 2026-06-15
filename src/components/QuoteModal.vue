@@ -176,7 +176,7 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
 import { useQuotesStore, type Quote } from '@/stores/quotes'
-import { useQuoteContext } from '@/composables/useQuoteContext'
+import { useQuoteContext } from '@/composables/UseQuoteContext.ts'
 import GroupSection from '@/components/GroupSection.vue'
 import ContextTab from '@/components/ContextTab.vue'
 import ImagesTab from '@/components/ImagesTab.vue'

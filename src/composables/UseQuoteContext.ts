@@ -1,5 +1,5 @@
 import { reactive } from "vue";
-import { useQuotesStore, type Quote } from "@/stores/quotes";
+import { useQuotesStore, type Quote } from "@/stores/quotes.ts";
 
 // ── Types ──────────────────────────────────────────────────
 export interface ContextData {
