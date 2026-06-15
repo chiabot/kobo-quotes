@@ -86,6 +86,8 @@ const DEMO = [
   { bookmark_id: '5', text: "Waste no more time arguing about what a good man should be. Be one.", book: "Meditations", author: "Marcus Aurelius", date: "2024-11-07", color: 3, book_progress: 71, image_url: '' },
   { bookmark_id: '6', text: "Nothing in life is as important as you think it is, while you are thinking about it.", book: "Thinking, Fast and Slow", author: "Daniel Kahneman", date: "2024-09-20", color: 3, book_progress: 55, image_url: '' },
   { bookmark_id: '7', text: "Reading is faster than listening. Doing is faster than watching.", book: "Naval Ravikant", author: "Eric Jorgenson", date: "2024-08-15", color: 1, book_progress: 29, image_url: '' },
+  { bookmark_id: '8', text: "We have a medical book published in 1822 passed down to Michael from his great-grandfather, a country doctor from the Ozark Mountains. A long section deals with yellow fever—in the 1800s no one knew what caused it or how it spread.", book: "Test", author: "Author Name", date: "2024-08-15", color: 2, book_progress: 29, image_url: '' },
+  { bookmark_id: '9', text: "The history of dieting begins in 1825, when the Frenchman Jean-Anthelme Brillat-Savarin published an essay entitled “Preventative or Curative Treatment of Obesity” in his gastronomic classic The Physiology of Taste", book: "Test", author: "Author Name", date: "2024-08-15", color: 2, book_progress: 29, image_url: '' },
 ]
 
 function loadDemo() {

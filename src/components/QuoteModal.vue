@@ -197,19 +197,71 @@ const emit = defineEmits<{
   'open-picker': []
 }>()
 
+const CONNECTORS = new Set([
+  'of','the','and','in','for','to','a','an','or','with','on','at','by','de','du','la','le','von','van'
+])
+
+
+function extractEntities(text: string) {
+  const words = text.split(/\s+/).filter(Boolean)
+  const entities = []
+  let i = 0
+
+  while (i < words.length) {
+    const clean = words[i]?.replace(/[.,;:!?"')\]]+$/, '')
+
+    if (/^[A-ZÀ-Ÿ]/.test(clean) && !isSentenceStart(words, i)) {
+      const parts = [clean]
+      let j = i + 1
+
+      while (j < words.length) {
+        const cj = words[j].replace(/[.,;:!?"')\]]+$/, '')
+
+        if (/^[A-ZÀ-Ÿ]/.test(cj)) {
+          parts.push(cj)
+          j++
+        } else if (
+          CONNECTORS.has(cj.toLowerCase()) &&
+          j + 1 < words.length &&
+          /^[A-ZÀ-Ÿ]/.test(words[j + 1].replace(/[.,;:!?"')\]]+$/, ''))
+        ) {
+          parts.push(cj)
+          j++
+        } else {
+          break
+        }
+      }
+
+      if (parts.length >= 2) {
+        entities.push(parts.join(' '))
+      }
+      i = j
+    } else {
+      i++
+    }
+  }
+  const doc = nlp(text)
+  const places = doc.places().out('array').map((item: string) => item.replace('\.', ''));
+  return [...new Set(entities), ...places]
+}
+
+function isSentenceStart(words: string, i: number) {
+  if (i === 0) return true
+  const prev = words[i - 1]
+  return prev ? /[.!?]["')\]]*$/.test(prev) : null
+}
+
 const enrichedQuoteText = computed(() => {
   const text = props.quote?.text
   if (!props.quote?.isBlue) return props.quote?.text
   if (!text) return ''
 
-  const doc = nlp(text)
-  const nouns = doc.match('#ProperNoun+').out('array')
-  if (!nouns.length) return text
+  const nouns = extractEntities(text)
 
   // Sort longest first so "Dr. Michael Eades" gets matched before "Michael"
   const sorted = [...new Set(nouns)].sort((a, b) => (b as String).length - (a as String).length)
   let result = text
-  for (const noun of sorted) {
+  for (let noun of sorted) {
     const escaped = (noun as String).replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
     result = result.replace(
       new RegExp(`\\b(${escaped})\\b`, 'g'),
@@ -337,6 +389,10 @@ function navigate(direction: number) {
 .sheet-leave-active { transition: transform 0.25s ease; }
 .sheet-enter-from,
 .sheet-leave-to { transform: translateY(100%); }
+</style>
+
+
+<style>
 
 .proper-noun {
   font-weight: bold;
