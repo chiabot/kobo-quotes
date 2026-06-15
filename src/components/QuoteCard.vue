@@ -32,7 +32,7 @@
           class="text-[11px] text-stone-500 bg-stone-50 px-2 py-0.5 active:bg-stone-100"
           @click.stop="emit('open', quote)"
         >
-          <Sparkles /> {{ memberCount }}</button>
+          <Sparkles class="inline"/> {{ memberCount }}</button>
       </div>
     </div>
   </div>
@@ -100,6 +100,6 @@ const handleOpen = () => {
 };
 
 const isGrouped = computed (() => {
-  return memberCount || props.quote.attachedImage;
+  return memberCount.value || props.quote.attachedImage;
 })
 </script>
