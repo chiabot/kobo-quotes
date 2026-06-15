@@ -56,6 +56,11 @@
             </p>
             <div v-else class="mb-5" />
 
+            <!-- Attached image -->
+            <div v-if="attachedImageUrl" class="mx-5 mb-5 rounded-xl overflow-hidden border border-stone-100">
+              <img :src="attachedImageUrl" class="w-full h-auto block" @error="attachedImageError = true" />
+            </div>
+
             <!-- Action item: done toggle -->
             <div v-if="quote.color === 1" class="flex items-center gap-3 mx-5 mb-5">
               <button
@@ -171,6 +176,7 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
 import { useQuotesStore, type Quote } from '@/stores/quotes'
+import { useQuoteContext } from '@/composables/useQuoteContext'
 import GroupSection from '@/components/GroupSection.vue'
 import ContextTab from '@/components/ContextTab.vue'
 import ImagesTab from '@/components/ImagesTab.vue'
@@ -191,8 +197,10 @@ const emit = defineEmits<{
 }>()
 
 const store = useQuotesStore()
+const { chapterImageUrl } = useQuoteContext()
 const copied = ref(false)
 const coverError = ref(false)
+const attachedImageError = ref(false)
 
 // ── Edit mode + tabs ─────────────────────────────────────
 const editMode = ref(false)
@@ -226,9 +234,15 @@ function onNavigateToQuote(bookmarkId: string) {
 // Reset cover error and edit/tab state when quote changes
 watch(() => props.quote, () => {
   coverError.value = false
+  attachedImageError.value = false
   editMode.value = false
   connectHint.value = false
   activeTab.value = 'context'
+})
+
+const attachedImageUrl = computed(() => {
+  if (!props.quote?.attachedImage || attachedImageError.value) return null
+  return chapterImageUrl(props.quote.bookmarkId, props.quote.attachedImage)
 })
 
 const coverSrc = computed(() => {
