@@ -18,6 +18,7 @@ export interface Quote {
   chapterTitle: string;
   tags: string[];
   attachedImage: string;
+  isBlue: boolean;
 }
 
 export const COLOR_MAP: Record<string, string> = {
@@ -32,6 +33,13 @@ export const COLOR_NAMES: Record<string, string> = {
   "1": "Action items",
   "2": "References",
   "3": "Extras",
+};
+
+export const COLOR_NAMES_BASIC: Record<string, string> = {
+  "0": "YELLOW",
+  "1": "RED",
+  "2": "BLUE",
+  "3": "GREEN",
 };
 
 const STORAGE_KEY = "kobo_quotes_v3";
@@ -165,6 +173,8 @@ export const useQuotesStore = defineStore("quotes", () => {
         chapterTitle: q.chapter_title || "",
         tags: q.tags || [],
         attachedImage: q.attached_image || "",
+        isBlue: COLOR_NAMES_BASIC[q.color] === "BLUE",
+        isRed: COLOR_NAMES_BASIC[q.color] === "RED"
       }))
       .filter((q: any) => q.text.trim());
 

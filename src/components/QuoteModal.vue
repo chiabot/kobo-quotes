@@ -43,8 +43,8 @@
             <div
               class="mx-5 mb-2 pl-4 border-l-2 text-stone-800"
               :class="quoteClass"
+              v-html="enrichedQuoteText"
             >
-              {{ quote.text }}
             </div>
 
             <!-- Author attribution -->
@@ -181,6 +181,7 @@ import GroupSection from '@/components/GroupSection.vue'
 import ContextTab from '@/components/ContextTab.vue'
 import ImagesTab from '@/components/ImagesTab.vue'
 import TagsTab from '@/components/TagsTab.vue'
+import nlp from 'compromise';
 
 const props = defineProps<{
   quote: Quote | null
@@ -195,6 +196,30 @@ const emit = defineEmits<{
   'navigate-to-quote': [bookmarkId: string]
   'open-picker': []
 }>()
+
+const enrichedQuoteText = computed(() => {
+  const text = props.quote?.text
+  if (!props.quote?.isBlue) return props.quote?.text
+  if (!text) return ''
+
+  const doc = nlp(text)
+  const nouns = doc.match('#ProperNoun+').out('array')
+  if (!nouns.length) return text
+
+  // Sort longest first so "Dr. Michael Eades" gets matched before "Michael"
+  const sorted = [...new Set(nouns)].sort((a, b) => (b as String).length - (a as String).length)
+  let result = text
+  for (const noun of sorted) {
+    const escaped = (noun as String).replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+    result = result.replace(
+      new RegExp(`\\b(${escaped})\\b`, 'g'),
+      '<span class="proper-noun">$1</span>'
+    )
+  }
+  return result
+})
+
+
 
 const store = useQuotesStore()
 const { chapterImageUrl } = useQuoteContext()
@@ -312,4 +337,11 @@ function navigate(direction: number) {
 .sheet-leave-active { transition: transform 0.25s ease; }
 .sheet-enter-from,
 .sheet-leave-to { transform: translateY(100%); }
+
+.proper-noun {
+  text-decoration: underline;
+  text-decoration-style: dotted;
+  text-underline-offset: 3px;
+  text-decoration-color: rgba(0,0,0,0.25);
+}
 </style>

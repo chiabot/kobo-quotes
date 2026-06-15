@@ -1,5 +1,10 @@
 import { reactive } from "vue";
-import { useQuotesStore, type Quote } from "@/stores/quotes.ts";
+import {
+  useQuotesStore,
+  type Quote,
+  type QuoteColor,
+  COLOR_NAMES_BASIC,
+} from "@/stores/quotes.ts";
 
 // ── Types ──────────────────────────────────────────────────
 export interface ContextData {
@@ -162,7 +167,13 @@ export function useQuoteContext() {
     }
   }
 
+const getColor = (colorCode: QuoteColor) => {
+  return COLOR_NAMES_BASIC[colorCode];
+};
+
   return {
+    //utils
+    getColor,
     // context
     ensureContext,
     expandContext,
