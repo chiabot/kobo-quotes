@@ -213,7 +213,7 @@ const enrichedQuoteText = computed(() => {
     const escaped = (noun as String).replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
     result = result.replace(
       new RegExp(`\\b(${escaped})\\b`, 'g'),
-      '<a class="proper-noun" href="https://www.google.com/search?q=$1">$1</a>'
+      '<a class="proper-noun" target="blank" href="https://www.google.com/search?q=$1">$1</a>'
     )
   }
   return result
