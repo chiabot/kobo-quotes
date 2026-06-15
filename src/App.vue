@@ -98,15 +98,14 @@ const visibleQuotes = computed(() =>
 const modalIndex = ref(-1)
 
 const modalQuote = computed<Quote | null>(() => {
-  const storeLocation = store.searchQuery ? 'allQuotes': 'filtered';
   if (modalIndex.value >= 0) {
-    return store[storeLocation][modalIndex.value]!
+    return store.allQuotes[modalIndex.value]!
    }
   return null;
 })
 
 function openModal(quote: Quote) {
-  const idx = store.filtered.findIndex(q => q.bookmarkId === quote.bookmarkId)
+  const idx = store.allQuotes.findIndex(q => q.bookmarkId === quote.bookmarkId)
   if (idx >= 0) modalIndex.value = idx
 }
 
@@ -125,8 +124,7 @@ function navigateModal(direction: number) {
 // section and group view to navigate to a master or a linked quote, even
 // if that quote is currently hidden from the main list as a member.
 function navigateToQuote(bookmarkId: string) {
-  const storeLocation = store.searchQuery ? 'allQuotes': 'filtered';
-  const idx = store[storeLocation].findIndex(q => q.bookmarkId === bookmarkId)
+  const idx = store.allQuotes.findIndex(q => q.bookmarkId === bookmarkId)
   if (idx >= 0) modalIndex.value = idx
 }
 
