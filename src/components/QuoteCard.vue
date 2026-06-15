@@ -26,14 +26,6 @@
       <span v-if="quote.date" class="text-[11px] text-stone-300">
         {{ formatDate(quote.date) }}
       </span>
-      <div class="flex items-center gap-1.5 ml-auto">
-        <button
-          v-if="isGrouped"
-          class="text-[11px] text-stone-500 bg-stone-50 px-2 py-0.5 active:bg-stone-100"
-          @click.stop="emit('open', quote)"
-        >
-          <Sparkles class="inline"/> {{ memberCount }}</button>
-      </div>
     </div>
   </div>
 </template>
