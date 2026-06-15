@@ -339,6 +339,7 @@ function navigate(direction: number) {
 .sheet-leave-to { transform: translateY(100%); }
 
 .proper-noun {
+  font-weight: bold;
   text-decoration: underline;
   text-decoration-style: dotted;
   text-underline-offset: 3px;
