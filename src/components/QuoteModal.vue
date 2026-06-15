@@ -62,7 +62,7 @@
             </div>
 
             <!-- Action item: done toggle -->
-            <div v-if="quote.color === 1" class="flex items-center gap-3 mx-5 mb-5">
+            <!-- <div v-if="quote.color === 1" class="flex items-center gap-3 mx-5 mb-5">
               <button
                 class="w-6 h-6 rounded border-2 flex items-center justify-center transition-all shrink-0"
                 :class="isDone ? 'bg-red-500 border-red-500' : 'bg-white border-red-400'"
@@ -71,7 +71,7 @@
                 <span v-if="isDone" class="text-white text-[13px] font-bold leading-none">✓</span>
               </button>
               <span class="text-[13px] text-red-400">{{ isDone ? 'Marked as done' : 'Mark as done' }}</span>
-            </div>
+            </div> -->
 
             <!-- Reference links -->
             <div v-if="quote.color === 2" class="flex gap-2 flex-wrap mx-5 mb-5">

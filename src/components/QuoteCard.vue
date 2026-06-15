@@ -34,9 +34,6 @@
 import { computed } from 'vue'
 import { useQuotesStore, type Quote } from '@/stores/quotes'
 import { useGroupsStore } from '@/stores/groups'
-import { Image } from '@lucide/vue';
-import { Sparkles } from '@lucide/vue';
-
 
 const props = defineProps<{
   quote: Quote
