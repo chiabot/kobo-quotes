@@ -91,15 +91,19 @@ const groupsStore = useGroupsStore()
 // Quotes that are members of a group are hidden from the main list —
 // only their master shows there, with a 🔗 N badge.
 const visibleQuotes = computed(() =>
-  store.filtered.filter(q => !groupsStore.allMemberIds.has(q.bookmarkId))
+  store.searchQuery ? store.filtered : store.filtered.filter(q => !groupsStore.allMemberIds.has(q.bookmarkId))
 )
 
 // ── Modal state ────────────────────────────────────────────
 const modalIndex = ref(-1)
 
-const modalQuote = computed<Quote | null>(() =>
-  modalIndex.value >= 0 ? store.filtered[modalIndex.value] ?? null : null
-)
+const modalQuote = computed<Quote | null>(() => {
+  const storeLocation = store.searchQuery ? 'allQuotes': 'filtered';
+  if (modalIndex.value >= 0) {
+    return store[storeLocation][modalIndex.value]!
+   }
+  return null;
+})
 
 function openModal(quote: Quote) {
   const idx = store.filtered.findIndex(q => q.bookmarkId === quote.bookmarkId)
@@ -121,7 +125,8 @@ function navigateModal(direction: number) {
 // section and group view to navigate to a master or a linked quote, even
 // if that quote is currently hidden from the main list as a member.
 function navigateToQuote(bookmarkId: string) {
-  const idx = store.filtered.findIndex(q => q.bookmarkId === bookmarkId)
+  const storeLocation = store.searchQuery ? 'allQuotes': 'filtered';
+  const idx = store[storeLocation].findIndex(q => q.bookmarkId === bookmarkId)
   if (idx >= 0) modalIndex.value = idx
 }
 
