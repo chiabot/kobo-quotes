@@ -201,21 +201,20 @@ const CONNECTORS = new Set([
   'of','the','and','in','for','to','a','an','or','with','on','at','by','de','du','la','le','von','van'
 ])
 
-
-function extractEntities(text: string) {
+function extractEntities(text: string): string[] {
   const words = text.split(/\s+/).filter(Boolean)
-  const entities = []
+  const entities: string[] = []
   let i = 0
 
   while (i < words.length) {
-    const clean = words[i]?.replace(/[.,;:!?"')\]]+$/, '')
+    const clean = words[i]?.replace(/[.,;:!?"')\]]+$/, '') ?? ''
 
     if (/^[A-ZÀ-Ÿ]/.test(clean) && !isSentenceStart(words, i)) {
-      const parts = [clean]
+      const parts: string[] = [clean]
       let j = i + 1
 
       while (j < words.length) {
-        const cj = words[j].replace(/[.,;:!?"')\]]+$/, '')
+        const cj = words[j]?.replace(/[.,;:!?"')\]]+$/, '') ?? ''
 
         if (/^[A-ZÀ-Ÿ]/.test(cj)) {
           parts.push(cj)
@@ -223,7 +222,7 @@ function extractEntities(text: string) {
         } else if (
           CONNECTORS.has(cj.toLowerCase()) &&
           j + 1 < words.length &&
-          /^[A-ZÀ-Ÿ]/.test(words[j + 1].replace(/[.,;:!?"')\]]+$/, ''))
+          /^[A-ZÀ-Ÿ]/.test(words[j + 1]?.replace(/[.,;:!?"')\]]+$/, '') ?? '')
         ) {
           parts.push(cj)
           j++
@@ -240,15 +239,16 @@ function extractEntities(text: string) {
       i++
     }
   }
+
   const doc = nlp(text)
-  const places = doc.places().out('array').map((item: string) => item.replace('\.', ''));
-  return [...new Set(entities), ...places]
+  const places: string[] = doc.places().out('array').map((item: string) => item.replace(/\.$/, ''))
+
+  return [...new Set([...entities, ...places])]
 }
 
-function isSentenceStart(words: string, i: number) {
+function isSentenceStart(words: string[], i: number): boolean {
   if (i === 0) return true
-  const prev = words[i - 1]
-  return prev ? /[.!?]["')\]]*$/.test(prev) : null
+  return /[.!?]["')\]]*$/.test(words[i - 1] ?? '')
 }
 
 const enrichedQuoteText = computed(() => {
