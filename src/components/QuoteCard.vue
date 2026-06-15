@@ -27,12 +27,13 @@
         {{ formatDate(quote.date) }}
       </span>
       <div class="flex items-center gap-1.5 ml-auto">
-        <span v-if="quote.attachedImage" class="text-[12px]" title="Image attached"><Image/></span>
         <button
           v-if="memberCount > 0"
           class="text-[11px] text-stone-500 bg-stone-50 border border-stone-200 rounded-full px-2 py-0.5 active:bg-stone-100"
           @click.stop="emit('group-view', quote.bookmarkId)"
-        ><Sparkles /> {{ memberCount }}</button>
+        >
+          <span v-if="quote.attachedImage" class="text-[12px]" title="Image attached"><Image/></span>
+          <Sparkles /> {{ memberCount }}</button>
       </div>
     </div>
   </div>
