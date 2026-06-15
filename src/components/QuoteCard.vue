@@ -1,7 +1,7 @@
 <template>
   <div
     class="bg-white border border-stone-200 rounded-2xl p-4 cursor-pointer active:border-stone-300 transition-colors"
-    @click="emit('open', quote)"
+    @click="handleOpen"
   >
     <!-- Top row: book title + color dot -->
     <div class="flex items-center justify-between mb-2 gap-2">
@@ -28,11 +28,10 @@
       </span>
       <div class="flex items-center gap-1.5 ml-auto">
         <button
-          v-if="memberCount > 0"
-          class="text-[11px] text-stone-500 bg-stone-50 border border-stone-200 rounded-full px-2 py-0.5 active:bg-stone-100"
-          @click.stop="emit('group-view', quote.bookmarkId)"
+          v-if="isGrouped"
+          class="text-[11px] text-stone-500 bg-stone-50 px-2 py-0.5 active:bg-stone-100"
+          @click.stop="emit('open', quote)"
         >
-          <span v-if="quote.attachedImage" class="text-[12px]" title="Image attached"><Image/></span>
           <Sparkles /> {{ memberCount }}</button>
       </div>
     </div>
@@ -90,4 +89,17 @@ function formatDate(d: string): string {
     return new Date(d).toLocaleDateString('en-CA', { year: 'numeric', month: 'short', day: 'numeric' })
   } catch { return d }
 }
+
+const handleOpen = () => {
+  if (isGrouped.value) { 
+    emit('group-view', props.quote.bookmarkId)
+  }
+  else {
+    emit('open', props.quote);
+  }
+};
+
+const isGrouped = computed (() => {
+  return memberCount || props.quote.attachedImage;
+})
 </script>
