@@ -25,8 +25,8 @@
               </div>
 
               <!-- Attached image -->
-              <div v-if="imageUrl" class="rounded-2xl overflow-hidden border border-stone-200 bg-white">
-                <img :src="imageUrl" class="w-full h-auto block" @error="imageError = true" />
+              <div v-if="imageUrl" class="border border-stone-200 bg-white">
+                <img :src="imageUrl" class="w-full h-auto min-h-10 block rounded-xl" @error="imageError = true" />
               </div>
 
               <!-- Members -->
@@ -83,7 +83,10 @@ const masterColorDot = computed(() => {
 
 const imageUrl = computed(() => {
   const m = master.value
-  if (!m?.attachedImage || imageError.value) return null
+  if (!m?.attachedImage || imageError.value) {
+    return null;
+    return 'https://imgs.search.brave.com/xGiQ4ZwMSCLFiwRn86hHTdh3I8vgFv7CVecGM4wQ4Ow/rs:fit:500:0:1:0/g:ce/aHR0cHM6Ly9pbWFn/ZXMudGVtcGxhdGUu/bmV0L3dwLWNvbnRl/bnQvdXBsb2Fkcy8y/MDIyLzExL1Bpbmst/V2FsbHBhcGVyLUlt/YWdlcy5qcGc'
+  }
   return chapterImageUrl(m.bookmarkId, m.attachedImage)
 })
 
