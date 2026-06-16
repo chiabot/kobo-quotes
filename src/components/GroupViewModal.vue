@@ -25,7 +25,7 @@
               </div>
 
               <!-- Attached image -->
-              <div v-if="imageUrl" class="border border-stone-200 bg-white">
+              <div v-if="imageUrl" class="border border-stone-200 bg-white rounded-xl">
                 <img :src="imageUrl" class="w-full h-auto min-h-10 block rounded-xl" @error="imageError = true" />
               </div>
 
