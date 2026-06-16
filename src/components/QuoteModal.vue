@@ -98,13 +98,13 @@
             />
 
             <!-- Edit toggle -->
-            <div class="flex justify-center px-5 pt-2.5 pb-1 border-t border-stone-100">
+            <div class="flex justify-center px-5 pt-2.5 pb-1 border-t border-stone-100 mb-5">
               <button
                 class="text-[12px] rounded-full px-4 py-1.5 transition-colors"
-                :class="isOnline ? 'bg-stone-100 text-stone-900' : 'text-stone-400'"
+                :class="isOnline ?  'text-stone-900' : 'text-stone-400'"
                 @click="toggleEdit"
               >
-              <span v-if="connectHint" class="block min-h-[24px]">Connect to Kobo to edit</span>
+              <span v-if="connectHint" class="block min-h-6">Connect to Kobo to edit</span>
               <Edit v-else/></button>
             </div>
 
