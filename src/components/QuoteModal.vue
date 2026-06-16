@@ -97,8 +97,20 @@
               @open-picker="emit('open-picker')"
             />
 
+            <!-- Edit toggle -->
+            <div class="flex justify-center px-5 pt-2.5 pb-1 border-t border-stone-100">
+              <button
+                class="text-[12px] rounded-full px-4 py-1.5 transition-colors"
+                :class="isOnline ? 'bg-stone-100 text-stone-900' : 'text-stone-400'"
+                @click="toggleEdit"
+              >
+              <span v-if="connectHint" class="block min-h-[24px]">Connect to Kobo to edit</span>
+              <Edit v-else/></button>
+            </div>
+
+            <div v-if="editMode">
             <!-- Reclassify (online only) -->
-            <div v-if="isOnline" class="mx-5 mb-5 pt-4 border-t border-stone-100">
+              <div v-if="isOnline" class="mx-5 mb-5 pt-4 border-t border-stone-100">
               <p class="text-[11px] text-stone-400 uppercase tracking-widest mb-3">Reclassify</p>
               <div class="flex gap-3 items-center">
                 <button
@@ -112,17 +124,6 @@
                 />
               </div>
             </div>
-
-            <!-- Edit toggle -->
-            <div class="flex justify-center px-5 pt-2.5 pb-1 border-t border-stone-100">
-              <button
-                class="text-[12px] rounded-full px-4 py-1.5 transition-colors"
-                :class="editMode ? 'bg-stone-100 text-stone-900' : 'text-stone-400'"
-                @click="toggleEdit"
-              >{{ editToggleLabel }}</button>
-            </div>
-
-            <div v-if="editMode">
               <!-- Tabs -->
               <div class="flex gap-1 px-5 mb-3.5 border-b border-stone-100">
                 <button
@@ -182,6 +183,7 @@ import ContextTab from '@/components/ContextTab.vue'
 import ImagesTab from '@/components/ImagesTab.vue'
 import TagsTab from '@/components/TagsTab.vue'
 import nlp from 'compromise';
+import { Edit } from '@lucide/vue'
 
 const props = defineProps<{
   quote: Quote | null
@@ -289,11 +291,6 @@ const tabs = [
   { id: 'images' as const, label: 'Images' },
   { id: 'tags' as const, label: 'Tags' },
 ]
-
-const editToggleLabel = computed(() => {
-  if (connectHint.value) return 'Connect to Kobo to edit'
-  return editMode.value ? '✕ Done editing' : '✏️ Edit'
-})
 
 function toggleEdit() {
   if (!props.isOnline) {

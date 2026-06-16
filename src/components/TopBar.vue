@@ -23,7 +23,7 @@
         v-if="store.searchQuery"
         class="absolute right-7 top-1/2 -translate-y-1/2 text-stone-400 text-lg px-1"
         @click="store.searchQuery = ''"
-      >×</button>
+      ><X /></button>
     </div>
 
     <!-- Filter row -->
@@ -132,7 +132,7 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue'
 import { useQuotesStore } from '@/stores/quotes'
-
+import { X } from '@lucide/vue'
 const store = useQuotesStore()
 
 const bookOpen = ref(false)
