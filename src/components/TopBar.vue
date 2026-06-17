@@ -28,12 +28,12 @@
       ><X /></button>
       <button @click="toggletagsFilter"><Tags/></button>
     </div>
-    <div class="h-8 w-px px-4 mb-2" v-if="tagsOpen">
+    <div class="px-4 mb-2 flex flex-wrap gap-1.5" v-if="tagsOpen">
       <button v-for="t in store.allTags" 
         :key="t"
-        class="text-stone-400 text-base leading-none px-1" @click="toggleTag(t)">
+        class="inline-flex items-center text-stone-400 text-base leading-none px-1" @click="toggleTag(t)">
       <span
-        class="inline-flex items-center gap-1.5 border border-stone-200 rounded-full px-1.5 py-1.5 text-[13px] text-stone-600"
+        class="border border-stone-200 rounded-full px-1.5 py-1.5 text-[13px] text-stone-600"
         :class="{'bg-orange-500 text-white': tagsFilter.includes(t), 'bg-stone-50 text-stone-600': !tagsFilter.includes(t)}"
       >
         {{ t }}
