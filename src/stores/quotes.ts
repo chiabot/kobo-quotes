@@ -66,6 +66,7 @@ export const useQuotesStore = defineStore("quotes", () => {
   const isLoading = ref(false);
   const connError = ref("");
   const selectedBook = ref("");
+  const tagsFilter = ref<String[]>([]);
   const selectedColor = ref("");
   const searchQuery = ref("");
   const coverCache = ref<Record<string, string>>({});
@@ -82,7 +83,10 @@ export const useQuotesStore = defineStore("quotes", () => {
         !sq ||
         q.text.toLowerCase().includes(sq) ||
         q.book.toLowerCase().includes(sq);
-      return bookMatch && colorMatch && textMatch;
+      const tagsMatch = tagsFilter.value ? tagsFilter.value.every((t) =>
+        q.tags.includes(t as string),
+      ) : true;
+      return bookMatch && colorMatch && textMatch && tagsMatch;
     });
   });
 
@@ -105,6 +109,10 @@ export const useQuotesStore = defineStore("quotes", () => {
     let name = parts[parts.length - 1] ?? "";
     name = name.replace(/\.(epub|mobi|pdf|azw3?)$/i, "");
     return name || v;
+  }
+
+  function setTagsFilter(tagsSelected: String[]) {
+    tagsFilter.value = tagsSelected;
   }
 
   function getBaseUrl(): string {
@@ -152,6 +160,13 @@ export const useQuotesStore = defineStore("quotes", () => {
     if (raw.includes(":")) return raw;
     return raw + IP_SUFFIX;
   }
+
+  const allTags = computed(() => {
+    const set = new Set<string>();
+    allQuotes.value.forEach((q) => q.tags.forEach((t) => set.add(t)));
+    return [...set].sort();
+  });
+
 
   // ── Data ingestion ─────────────────────────────────────
   function ingest(data: any[], live: boolean) {
@@ -437,12 +452,14 @@ export const useQuotesStore = defineStore("quotes", () => {
   return {
     // State
     allQuotes,
+    allTags,
     isLive,
     isConnected,
     isLoading,
     connError,
     selectedBook,
     selectedColor,
+    tagsFilter,
     searchQuery,
     coverCache,
     doneState,
@@ -464,6 +481,7 @@ export const useQuotesStore = defineStore("quotes", () => {
     coverUrl,
     getFullIp,
     getBaseUrl,
+    setTagsFilter,
     COLOR_MAP,
     COLOR_NAMES,
     IP_SUFFIX,

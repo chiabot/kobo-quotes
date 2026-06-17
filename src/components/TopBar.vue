@@ -10,7 +10,7 @@
     </div>
 
     <!-- Search -->
-    <div class="relative px-4 mb-2">
+    <div class="relative px-4 mb-2 flex items-center gap-2">
       <input
         v-model="store.searchQuery"
         type="search"
@@ -19,11 +19,26 @@
         spellcheck="false"
         class="w-full bg-white border border-stone-200 rounded-xl text-[16px] px-3 py-[11px] pr-9 outline-none focus:border-stone-400"
       />
+      <!-- Vertical Separator -->
+    <div class="h-8 w-px bg-gray-300 mx-2"></div>
       <button
         v-if="store.searchQuery"
         class="absolute right-7 top-1/2 -translate-y-1/2 text-stone-400 text-lg px-1"
         @click="store.searchQuery = ''"
       ><X /></button>
+      <button @click="toggletagsFilter"><Tags/></button>
+    </div>
+    <div class="h-8 w-px px-4 mb-2" v-if="tagsOpen">
+      <button v-for="t in store.allTags" 
+        :key="t"
+        class="text-stone-400 text-base leading-none px-1" @click="toggleTag(t)">
+      <span
+        class="inline-flex items-center gap-1.5 border border-stone-200 rounded-full px-1.5 py-1.5 text-[13px] text-stone-600"
+        :class="{'bg-orange-500 text-white': tagsFilter.includes(t), 'bg-stone-50 text-stone-600': !tagsFilter.includes(t)}"
+      >
+        {{ t }}
+      </span> 
+      </button>
     </div>
 
     <!-- Filter row -->
@@ -132,13 +147,34 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue'
 import { useQuotesStore } from '@/stores/quotes'
-import { X } from '@lucide/vue'
+import { X, Tags } from '@lucide/vue'
 const store = useQuotesStore()
 
 const bookOpen = ref(false)
 const colorOpen = ref(false)
+const tagsOpen = ref(false);
 const bookDropdownStyle = ref({})
 const bookBtnRef = ref<HTMLElement | null>(null)
+const tagsFilter = ref<String[]>([]);
+
+
+function toggletagsFilter() {
+  tagsOpen.value = !tagsOpen.value;
+  if (!tagsOpen.value) {
+    tagsFilter.value = []
+    store.setTagsFilter(tagsFilter.value);
+  }
+}
+
+function toggleTag (tag: string) {
+  const index = tagsFilter.value.indexOf(tag);
+  if (index === -1) {
+      tagsFilter.value.push(tag)
+  } else {
+    tagsFilter.value.splice(index, 1);
+  }
+  store.setTagsFilter(tagsFilter.value);
+}
 
 function toggleBook(e: MouseEvent) {
   colorOpen.value = false
