@@ -66,7 +66,7 @@ export const useQuotesStore = defineStore("quotes", () => {
   const isLoading = ref(false);
   const connError = ref("");
   const selectedBook = ref("");
-  const tagsFilter = ref<String[]>([]);
+  const tagsFilter = ref<String[] | false>([]);
   const toggleWithImage = ref<Boolean | null>(null);
   const selectedColor = ref("");
   const searchQuery = ref("");
@@ -84,9 +84,9 @@ export const useQuotesStore = defineStore("quotes", () => {
         !sq ||
         q.text.toLowerCase().includes(sq) ||
         q.book.toLowerCase().includes(sq);
-      const tagsMatch = tagsFilter.value ? tagsFilter.value.every((t) =>
-        q.tags.includes(t as string),
-      ) : true;
+      const tagsMatch = tagsFilter.value
+        ? tagsFilter.value.every((t) => q.tags.includes(t as string))
+        : !tagsFilter.value === !q.tags as Boolean;
       const imagesMatch = toggleWithImage.value !== null ? toggleWithImage.value === !!q.attachedImage : true;
       return bookMatch && colorMatch && textMatch && tagsMatch && imagesMatch;
     });
@@ -113,7 +113,7 @@ export const useQuotesStore = defineStore("quotes", () => {
     return name || v;
   }
 
-  function setTagsFilter(tagsSelected: String[]) {
+  function setTagsFilter(tagsSelected: String[] | false) {
     tagsFilter.value = tagsSelected;
   }
 

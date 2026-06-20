@@ -26,13 +26,15 @@
         class="absolute right-7 top-1/2 -translate-y-1/2 text-stone-400 text-lg px-1"
         @click="store.searchQuery = ''"
       ><X /></button>      
-      <button @click="toggletagsFilter" :class="tagsOpen ? 'text-stone-800' : 'text-stone-400'"><Tags/></button>
+      <button @click="toggletagsFilter" :class="toggleWithTags || toggleWithTags === false ? 'text-stone-800' : 'text-stone-400'">
+        <Tags v-if="toggleWithTags || toggleWithTags === null"/><SvgIcon name="tags-off" v-else/>
+      </button>
       <button @click="filterWithImage" :class="typeof toggleWithImage === 'boolean' ? 'text-stone-800' : 'text-stone-400'">
         <Images v-if="toggleWithImage || toggleWithImage === null"/>
         <ImageOff v-else/>
       </button>
     </div>
-    <div class="px-4 mb-2 flex flex-wrap gap-1.5" v-if="tagsOpen">
+    <div class="px-4 mb-2 flex flex-wrap gap-1.5" v-if="toggleWithTags">
       <button v-for="t in store.allTags" 
         :key="t"
         class="inline-flex items-center text-stone-400 text-base leading-none px-1" @click="toggleTag(t)">
@@ -152,21 +154,33 @@
 import { ref, onMounted, onUnmounted } from 'vue'
 import { useQuotesStore } from '@/stores/quotes'
 import { X, Tags, Images, ImageOff } from '@lucide/vue'
+import SvgIcon from './SvgIcon.vue';
 const store = useQuotesStore()
 
 const bookOpen = ref(false)
 const colorOpen = ref(false)
-const tagsOpen = ref(false);
+const toggleWithTags = ref<boolean | null>(null);
 const toggleWithImage = ref<boolean | null>(null);
 const bookDropdownStyle = ref({})
 const bookBtnRef = ref<HTMLElement | null>(null)
-const tagsFilter = ref<String[]>([]);
+const tagsFilter = ref<String[] | false>([]);
 
 
 function toggletagsFilter() {
-  tagsOpen.value = !tagsOpen.value;
-  if (!tagsOpen.value) {
-    tagsFilter.value = []
+  switch(toggleWithTags.value) {
+    case null: 
+     toggleWithTags.value = true;
+     break;
+    case true: 
+     toggleWithTags.value = false;
+      tagsFilter.value = false;
+     break;
+    case false: 
+     toggleWithTags.value = null;
+      tagsFilter.value = []
+     break;
+  }
+  if (!toggleWithTags.value) {
     store.setTagsFilter(tagsFilter.value);
   }
 }
