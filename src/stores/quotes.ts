@@ -1,5 +1,6 @@
 import { defineStore } from "pinia";
 import { ref, computed } from "vue";
+import { getAllCovers, setCover } from "./imageDb";
 
 export type QuoteColor = 0 | 1 | 2 | 3 | -1;
 
@@ -44,7 +45,6 @@ export const COLOR_NAMES_BASIC: Record<string, string> = {
 
 const STORAGE_KEY = "kobo_quotes_v3";
 const IP_KEY = "kobo_ip_v3";
-const COVERS_KEY = "kobo_covers_v1";
 const DONE_KEY = "kobo_done_v1";
 const SUBNETS_KEY = "kobo_known_subnets";
 
@@ -198,9 +198,7 @@ export const useQuotesStore = defineStore("quotes", () => {
     connError.value = "";
 
     // Load persisted state
-    try {
-      coverCache.value = JSON.parse(localStorage.getItem(COVERS_KEY) || "{}");
-    } catch {}
+    getAllCovers().then((covers) => { coverCache.value = covers; }).catch(() => {});
     try {
       doneState.value = JSON.parse(localStorage.getItem(DONE_KEY) || "{}");
     } catch {}
@@ -229,12 +227,12 @@ export const useQuotesStore = defineStore("quotes", () => {
             reader.readAsDataURL(blob);
           });
           cache[b.volumeId] = b64;
+          await setCover(b.volumeId, b64);
         } catch {}
       }),
     );
 
     coverCache.value = cache;
-    localStorage.setItem(COVERS_KEY, JSON.stringify(cache));
   }
 
   // ── Connection ─────────────────────────────────────────
