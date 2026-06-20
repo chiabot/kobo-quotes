@@ -67,7 +67,7 @@ export const useQuotesStore = defineStore("quotes", () => {
   const connError = ref("");
   const selectedBook = ref("");
   const tagsFilter = ref<String[]>([]);
-  const toggleWithImage = ref<Boolean>(false);
+  const toggleWithImage = ref<Boolean | null>(null);
   const selectedColor = ref("");
   const searchQuery = ref("");
   const coverCache = ref<Record<string, string>>({});
@@ -87,7 +87,7 @@ export const useQuotesStore = defineStore("quotes", () => {
       const tagsMatch = tagsFilter.value ? tagsFilter.value.every((t) =>
         q.tags.includes(t as string),
       ) : true;
-      const imagesMatch = toggleWithImage.value ? !!q.attachedImage : true;
+      const imagesMatch = toggleWithImage.value !== null ? toggleWithImage.value === !!q.attachedImage : true;
       return bookMatch && colorMatch && textMatch && tagsMatch && imagesMatch;
     });
   });
@@ -117,7 +117,7 @@ export const useQuotesStore = defineStore("quotes", () => {
     tagsFilter.value = tagsSelected;
   }
 
-  function toggleImageFilter(toggle: boolean) {
+  function toggleImageFilter(toggle: boolean | null) {
     toggleWithImage.value = toggle;
   }
 

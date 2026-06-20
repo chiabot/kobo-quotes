@@ -25,9 +25,12 @@
         v-if="store.searchQuery"
         class="absolute right-7 top-1/2 -translate-y-1/2 text-stone-400 text-lg px-1"
         @click="store.searchQuery = ''"
-      ><X /></button>
-      <button @click="filterWithImage" :class="toggleWithImage ? 'text-stone-800' : 'text-stone-400'"><Images/></button>
+      ><X /></button>      
       <button @click="toggletagsFilter" :class="tagsOpen ? 'text-stone-800' : 'text-stone-400'"><Tags/></button>
+      <button @click="filterWithImage" :class="typeof toggleWithImage === 'boolean' ? 'text-stone-800' : 'text-stone-400'">
+        <Images v-if="toggleWithImage || toggleWithImage === null"/>
+        <ImageOff v-else/>
+      </button>
     </div>
     <div class="px-4 mb-2 flex flex-wrap gap-1.5" v-if="tagsOpen">
       <button v-for="t in store.allTags" 
@@ -148,13 +151,13 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue'
 import { useQuotesStore } from '@/stores/quotes'
-import { X, Tags, Images } from '@lucide/vue'
+import { X, Tags, Images, ImageOff } from '@lucide/vue'
 const store = useQuotesStore()
 
 const bookOpen = ref(false)
 const colorOpen = ref(false)
 const tagsOpen = ref(false);
-const toggleWithImage = ref(false);
+const toggleWithImage = ref<boolean | null>(null);
 const bookDropdownStyle = ref({})
 const bookBtnRef = ref<HTMLElement | null>(null)
 const tagsFilter = ref<String[]>([]);
@@ -169,7 +172,18 @@ function toggletagsFilter() {
 }
 
 function filterWithImage() {
-  toggleWithImage.value = !toggleWithImage.value;
+  switch(toggleWithImage.value) {
+    case null: 
+     toggleWithImage.value = true
+     break;
+    case true: 
+     toggleWithImage.value = false
+     break;
+    case false: 
+     toggleWithImage.value = null
+     break;
+  }
+  console.log(toggleWithImage.value)
   store.toggleImageFilter(toggleWithImage.value);
 }
 
