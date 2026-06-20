@@ -40,7 +40,7 @@
         class="inline-flex items-center text-stone-400 text-base leading-none px-1" @click="toggleTag(t)">
       <span
         class="border border-stone-200 rounded-full px-1.5 py-1.5 text-[13px] text-stone-600"
-        :class="{'bg-orange-500 text-white': tagsFilter.includes(t), 'bg-stone-50 text-stone-600': !tagsFilter.includes(t)}"
+        :class="{'bg-orange-500 text-white': tagsFilter && tagsFilter.includes(t), 'bg-stone-50 text-stone-600': tagsFilter && !tagsFilter.includes(t)}"
       >
         {{ t }}
       </span> 
@@ -163,7 +163,7 @@ const toggleWithTags = ref<boolean | null>(null);
 const toggleWithImage = ref<boolean | null>(null);
 const bookDropdownStyle = ref({})
 const bookBtnRef = ref<HTMLElement | null>(null)
-const tagsFilter = ref<String[] | false>([]);
+const tagsFilter = ref<String[]>([]);
 
 
 function toggletagsFilter() {
@@ -173,15 +173,15 @@ function toggletagsFilter() {
      break;
     case true: 
      toggleWithTags.value = false;
-      tagsFilter.value = false;
      break;
     case false: 
      toggleWithTags.value = null;
-      tagsFilter.value = []
      break;
   }
-  if (!toggleWithTags.value) {
-    store.setTagsFilter(tagsFilter.value);
+  if (toggleWithTags.value === false) {
+    store.setNoTagsFilter(true);
+  } else {
+    store.setNoTagsFilter(false);
   }
 }
 
@@ -197,7 +197,6 @@ function filterWithImage() {
      toggleWithImage.value = null
      break;
   }
-  console.log(toggleWithImage.value)
   store.toggleImageFilter(toggleWithImage.value);
 }
 

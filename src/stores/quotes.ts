@@ -66,7 +66,8 @@ export const useQuotesStore = defineStore("quotes", () => {
   const isLoading = ref(false);
   const connError = ref("");
   const selectedBook = ref("");
-  const tagsFilter = ref<String[] | false>([]);
+  const tagsFilter = ref<String[]>([]);
+  const noTagsFilter = ref<boolean>(false);
   const toggleWithImage = ref<Boolean | null>(null);
   const selectedColor = ref("");
   const searchQuery = ref("");
@@ -84,11 +85,11 @@ export const useQuotesStore = defineStore("quotes", () => {
         !sq ||
         q.text.toLowerCase().includes(sq) ||
         q.book.toLowerCase().includes(sq);
-      const tagsMatch = tagsFilter.value
-        ? tagsFilter.value.every((t) => q.tags.includes(t as string))
-        : !tagsFilter.value === !q.tags as Boolean;
+      const tagsMatch = tagsFilter.value.length ? tagsFilter.value.every((t) => q.tags.includes(t as string)) : true;
+      const noTags = noTagsFilter.value ?  q.tags.length === 0 : true;
+
       const imagesMatch = toggleWithImage.value !== null ? toggleWithImage.value === !!q.attachedImage : true;
-      return bookMatch && colorMatch && textMatch && tagsMatch && imagesMatch;
+      return bookMatch && colorMatch && textMatch && tagsMatch && noTags && imagesMatch;
     });
   });
 
@@ -113,8 +114,12 @@ export const useQuotesStore = defineStore("quotes", () => {
     return name || v;
   }
 
-  function setTagsFilter(tagsSelected: String[] | false) {
+  function setTagsFilter(tagsSelected: String[]) {
     tagsFilter.value = tagsSelected;
+  }
+
+  function setNoTagsFilter(noTags: boolean) {
+    noTagsFilter.value = noTags;
   }
 
   function toggleImageFilter(toggle: boolean | null) {
@@ -486,6 +491,7 @@ export const useQuotesStore = defineStore("quotes", () => {
     getFullIp,
     getBaseUrl,
     setTagsFilter,
+    setNoTagsFilter,
     toggleImageFilter,
     COLOR_MAP,
     COLOR_NAMES,
