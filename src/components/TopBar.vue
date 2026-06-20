@@ -26,7 +26,8 @@
         class="absolute right-7 top-1/2 -translate-y-1/2 text-stone-400 text-lg px-1"
         @click="store.searchQuery = ''"
       ><X /></button>
-      <button @click="toggletagsFilter"><Tags/></button>
+      <button @click="filterWithImage" :class="toggleWithImage ? 'text-stone-800' : 'text-stone-400'"><Images/></button>
+      <button @click="toggletagsFilter" :class="tagsOpen ? 'text-stone-800' : 'text-stone-400'"><Tags/></button>
     </div>
     <div class="px-4 mb-2 flex flex-wrap gap-1.5" v-if="tagsOpen">
       <button v-for="t in store.allTags" 
@@ -147,12 +148,13 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue'
 import { useQuotesStore } from '@/stores/quotes'
-import { X, Tags } from '@lucide/vue'
+import { X, Tags, Images } from '@lucide/vue'
 const store = useQuotesStore()
 
 const bookOpen = ref(false)
 const colorOpen = ref(false)
 const tagsOpen = ref(false);
+const toggleWithImage = ref(false);
 const bookDropdownStyle = ref({})
 const bookBtnRef = ref<HTMLElement | null>(null)
 const tagsFilter = ref<String[]>([]);
@@ -164,6 +166,11 @@ function toggletagsFilter() {
     tagsFilter.value = []
     store.setTagsFilter(tagsFilter.value);
   }
+}
+
+function filterWithImage() {
+  toggleWithImage.value = !toggleWithImage.value;
+  store.toggleImageFilter(toggleWithImage.value);
 }
 
 function toggleTag (tag: string) {

@@ -67,6 +67,7 @@ export const useQuotesStore = defineStore("quotes", () => {
   const connError = ref("");
   const selectedBook = ref("");
   const tagsFilter = ref<String[]>([]);
+  const toggleWithImage = ref<Boolean>(false);
   const selectedColor = ref("");
   const searchQuery = ref("");
   const coverCache = ref<Record<string, string>>({});
@@ -86,7 +87,8 @@ export const useQuotesStore = defineStore("quotes", () => {
       const tagsMatch = tagsFilter.value ? tagsFilter.value.every((t) =>
         q.tags.includes(t as string),
       ) : true;
-      return bookMatch && colorMatch && textMatch && tagsMatch;
+      const imagesMatch = toggleWithImage.value ? !!q.attachedImage : true;
+      return bookMatch && colorMatch && textMatch && tagsMatch && imagesMatch;
     });
   });
 
@@ -113,6 +115,10 @@ export const useQuotesStore = defineStore("quotes", () => {
 
   function setTagsFilter(tagsSelected: String[]) {
     tagsFilter.value = tagsSelected;
+  }
+
+  function toggleImageFilter(toggle: boolean) {
+    toggleWithImage.value = toggle;
   }
 
   function getBaseUrl(): string {
@@ -480,6 +486,7 @@ export const useQuotesStore = defineStore("quotes", () => {
     getFullIp,
     getBaseUrl,
     setTagsFilter,
+    toggleImageFilter,
     COLOR_MAP,
     COLOR_NAMES,
     IP_SUFFIX,
