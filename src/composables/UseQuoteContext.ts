@@ -6,6 +6,8 @@ import {
   COLOR_NAMES_BASIC,
 } from "@/stores/quotes.ts";
 
+import { setImage } from "@/stores/imageDb";
+
 // ── Types ──────────────────────────────────────────────────
 export interface ContextData {
   before: string[];
@@ -164,6 +166,24 @@ export function useQuoteContext() {
             image_path: newPath,
           }),
         });
+
+        // Cache the blob so it survives offline
+        if (newPath && !quotesStore.getCachedImage(newPath)) {
+          const imgUrl = `${base}/chapter-image?bookmark_id=${encodeURIComponent(q.bookmarkId)}&path=${encodeURIComponent(newPath)}`;
+          const res = await fetch(imgUrl, {
+            signal: AbortSignal.timeout(5000),
+          });
+          if (res.ok) {
+            const blob = await res.blob();
+            const b64 = await new Promise<string>((resolve) => {
+              const reader = new FileReader();
+              reader.onload = () => resolve(reader.result as string);
+              reader.readAsDataURL(blob);
+            });
+            await setImage(newPath, b64);
+            quotesStore.setImageCache(newPath, b64);
+          }
+        }
       } catch (e) {
         console.error("selectImage failed", e);
       }

@@ -282,6 +282,10 @@ export const useQuotesStore = defineStore("quotes", () => {
     return imageCache.value[path] || null;
   }
 
+  function setImageCache(path: string, b64: string) {
+    imageCache.value[path] = b64;
+  }
+
   // ── Connection ─────────────────────────────────────────
   async function tryUrl(
     url: string,
@@ -524,6 +528,7 @@ export const useQuotesStore = defineStore("quotes", () => {
     updateColor,
     getCachedCover,
     getCachedImage,
+    setImageCache,
     coverUrl,
     getFullIp,
     getBaseUrl,
