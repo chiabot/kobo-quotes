@@ -139,8 +139,11 @@ export function useQuoteContext() {
   }
 
   function chapterImageUrl(bookmarkId: string, path: string): string | null {
+    if (!path) return null;
+    const cached = quotesStore.getCachedImage(path);
+    if (cached) return cached;
     const base = quotesStore.getBaseUrl();
-    if (!base || !path) return null;
+    if (!base) return null;
     return `${base}/chapter-image?bookmark_id=${encodeURIComponent(bookmarkId)}&path=${encodeURIComponent(path)}`;
   }
 

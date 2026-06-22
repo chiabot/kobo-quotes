@@ -1,6 +1,6 @@
 import { defineStore } from "pinia";
 import { ref, computed } from "vue";
-import { getAllCovers, setCover } from "./imageDb";
+import { getAllCovers, setCover, getAllImages, setImage } from "./imageDb";
 
 export type QuoteColor = 0 | 1 | 2 | 3 | -1;
 
@@ -72,6 +72,7 @@ export const useQuotesStore = defineStore("quotes", () => {
   const selectedColor = ref("");
   const searchQuery = ref("");
   const coverCache = ref<Record<string, string>>({});
+  const imageCache = ref<Record<string, string>>({});
   const doneState = ref<Record<string, boolean>>({});
 
   // ── Getters ────────────────────────────────────────────
@@ -210,11 +211,12 @@ export const useQuotesStore = defineStore("quotes", () => {
 
     // Load persisted state
     getAllCovers().then((covers) => { coverCache.value = covers; }).catch(() => {});
+    getAllImages().then((imgs) => { imageCache.value = imgs; }).catch(() => {});
     try {
       doneState.value = JSON.parse(localStorage.getItem(DONE_KEY) || "{}");
     } catch {}
 
-    if (live) fetchAndCacheCovers();
+    if (live) { fetchAndCacheCovers(); fetchAndCacheImages(); }
   }
 
   async function fetchAndCacheCovers() {
@@ -244,6 +246,40 @@ export const useQuotesStore = defineStore("quotes", () => {
     );
 
     coverCache.value = cache;
+  }
+
+  async function fetchAndCacheImages() {
+    const base = getBaseUrl();
+    if (!base) return;
+    const toFetch = allQuotes.value.filter(
+      (q) => q.attachedImage && !imageCache.value[q.attachedImage],
+    );
+    if (!toFetch.length) return;
+
+    const cache = { ...imageCache.value };
+    await Promise.all(
+      toFetch.map(async (q) => {
+        const url = `${base}/chapter-image?bookmark_id=${encodeURIComponent(q.bookmarkId)}&path=${encodeURIComponent(q.attachedImage)}`;
+        try {
+          const res = await fetch(url, { signal: AbortSignal.timeout(5000) });
+          if (!res.ok) return;
+          const blob = await res.blob();
+          const b64 = await new Promise<string>((resolve) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result as string);
+            reader.readAsDataURL(blob);
+          });
+          cache[q.attachedImage] = b64;
+          await setImage(q.attachedImage, b64);
+        } catch {}
+      }),
+    );
+
+    imageCache.value = cache;
+  }
+
+  function getCachedImage(path: string): string | null {
+    return imageCache.value[path] || null;
   }
 
   // ── Connection ─────────────────────────────────────────
@@ -487,6 +523,7 @@ export const useQuotesStore = defineStore("quotes", () => {
     isDone,
     updateColor,
     getCachedCover,
+    getCachedImage,
     coverUrl,
     getFullIp,
     getBaseUrl,
