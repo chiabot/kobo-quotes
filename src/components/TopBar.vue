@@ -178,6 +178,10 @@ function toggletagsFilter() {
      toggleWithTags.value = null;
      break;
   }
+  if (!toggleWithTags.value) {
+    tagsFilter.value = [];
+    store.setTagsFilter(tagsFilter.value);
+  }
   if (toggleWithTags.value === false) {
     store.setNoTagsFilter(true);
   } else {
