@@ -186,10 +186,14 @@ export function useShareCard() {
     });
 
     if (quote.author) {
+      const pubYear = store.getPubYear(quote.volumeId);
+      const authorLine = pubYear
+        ? `${quote.author} · ${pubYear}`
+        : quote.author;
       ctx.font = AUTHOR_FONT;
       ctx.fillStyle = "#a8a29e";
       ctx.fillText(
-        quote.author,
+        authorLine,
         metaX,
         coverY + 36 + titleLines.length * 34 + 12,
       );

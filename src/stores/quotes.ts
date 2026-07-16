@@ -47,7 +47,6 @@ const STORAGE_KEY = "kobo_quotes_v3";
 const IP_KEY = "kobo_ip_v3";
 const DONE_KEY = "kobo_done_v1";
 const SUBNETS_KEY = "kobo_known_subnets";
-const BOOK_TAGS_KEY = "kobo_book_tags_v1";
 
 const SCAN_SUBNETS = [
   "10.0.0",
@@ -75,10 +74,6 @@ export const useQuotesStore = defineStore("quotes", () => {
   const coverCache = ref<Record<string, string>>({});
   const imageCache = ref<Record<string, string>>({});
   const doneState = ref<Record<string, boolean>>({});
-  const currentView = ref<"quotes" | "books">("quotes");
-  const bookTags = ref<Record<string, string[]>>(
-    (() => { try { return JSON.parse(localStorage.getItem(BOOK_TAGS_KEY) || "{}"); } catch { return {}; } })()
-  );
 
   // ── Getters ────────────────────────────────────────────
   const filtered = computed(() => {
@@ -91,14 +86,23 @@ export const useQuotesStore = defineStore("quotes", () => {
         !sq ||
         q.text.toLowerCase().includes(sq) ||
         q.book.toLowerCase().includes(sq);
-      const bTags = bookTags.value[q.book] || [];
       const tagsMatch = tagsFilter.value.length
-        ? tagsFilter.value.every((t) => q.tags.includes(t as string) || bTags.includes(t as string))
+        ? tagsFilter.value.every((t) => q.tags.includes(t as string))
         : true;
       const noTags = noTagsFilter.value ? q.tags.length === 0 : true;
 
-      const imagesMatch = toggleWithImage.value !== null ? toggleWithImage.value === !!q.attachedImage : true;
-      return bookMatch && colorMatch && textMatch && tagsMatch && noTags && imagesMatch;
+      const imagesMatch =
+        toggleWithImage.value !== null
+          ? toggleWithImage.value === !!q.attachedImage
+          : true;
+      return (
+        bookMatch &&
+        colorMatch &&
+        textMatch &&
+        tagsMatch &&
+        noTags &&
+        imagesMatch
+      );
     });
   });
 
@@ -133,15 +137,6 @@ export const useQuotesStore = defineStore("quotes", () => {
 
   function toggleImageFilter(toggle: boolean | null) {
     toggleWithImage.value = toggle;
-  }
-
-  function getBookTags(bookTitle: string): string[] {
-    return bookTags.value[bookTitle] || [];
-  }
-
-  function setBookTags(bookTitle: string, tags: string[]) {
-    bookTags.value = { ...bookTags.value, [bookTitle]: tags };
-    localStorage.setItem(BOOK_TAGS_KEY, JSON.stringify(bookTags.value));
   }
 
   function getBaseUrl(): string {
@@ -193,10 +188,39 @@ export const useQuotesStore = defineStore("quotes", () => {
   const allTags = computed(() => {
     const set = new Set<string>();
     allQuotes.value.forEach((q) => q.tags.forEach((t) => set.add(t)));
-    Object.values(bookTags.value).forEach((tags) => tags.forEach((t) => set.add(t)));
     return [...set].sort();
   });
 
+  // ── Books metadata (pub year, book-level tags) ──────────
+  interface BookMeta {
+    pubYear: string;
+    tags: string[];
+  }
+  const booksMeta = ref<Record<string, BookMeta>>({});
+
+  async function fetchBooksMeta() {
+    const base = getBaseUrl();
+    if (!base) return;
+    try {
+      const res = await fetch(base + "/books.json", {
+        signal: AbortSignal.timeout(8000),
+      });
+      if (!res.ok) return;
+      const data = await res.json();
+      if (!Array.isArray(data)) return;
+      const map: Record<string, BookMeta> = {};
+      for (const b of data) {
+        if (b.volume_id) {
+          map[b.volume_id] = { pubYear: b.pub_year || "", tags: b.tags || [] };
+        }
+      }
+      booksMeta.value = map;
+    } catch {}
+  }
+
+  function getPubYear(volumeId: string): string {
+    return booksMeta.value[volumeId]?.pubYear || "";
+  }
 
   // ── Data ingestion ─────────────────────────────────────
   function ingest(data: any[], live: boolean) {
@@ -219,7 +243,7 @@ export const useQuotesStore = defineStore("quotes", () => {
         tags: q.tags || [],
         attachedImage: q.attached_image || "",
         isBlue: COLOR_NAMES_BASIC[q.color] === "BLUE",
-        isRed: COLOR_NAMES_BASIC[q.color] === "RED"
+        isRed: COLOR_NAMES_BASIC[q.color] === "RED",
       }))
       .filter((q: any) => q.text.trim());
 
@@ -228,13 +252,25 @@ export const useQuotesStore = defineStore("quotes", () => {
     connError.value = "";
 
     // Load persisted state
-    getAllCovers().then((covers) => { coverCache.value = covers; }).catch(() => {});
-    getAllImages().then((imgs) => { imageCache.value = imgs; }).catch(() => {});
+    getAllCovers()
+      .then((covers) => {
+        coverCache.value = covers;
+      })
+      .catch(() => {});
+    getAllImages()
+      .then((imgs) => {
+        imageCache.value = imgs;
+      })
+      .catch(() => {});
     try {
       doneState.value = JSON.parse(localStorage.getItem(DONE_KEY) || "{}");
     } catch {}
 
-    if (live) { fetchAndCacheCovers(); fetchAndCacheImages(); }
+    if (live) {
+      fetchAndCacheCovers();
+      fetchAndCacheImages();
+      fetchBooksMeta();
+    }
   }
 
   async function fetchAndCacheCovers() {
@@ -547,16 +583,14 @@ export const useQuotesStore = defineStore("quotes", () => {
     getCachedCover,
     getCachedImage,
     setImageCache,
+    getPubYear,
+    booksMeta,
     coverUrl,
     getFullIp,
     getBaseUrl,
     setTagsFilter,
     setNoTagsFilter,
     toggleImageFilter,
-    currentView,
-    bookTags,
-    getBookTags,
-    setBookTags,
     COLOR_MAP,
     COLOR_NAMES,
     IP_SUFFIX,

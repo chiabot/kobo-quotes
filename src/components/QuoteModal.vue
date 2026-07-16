@@ -14,7 +14,7 @@
             <!-- Handle -->
             <div class="w-10 h-1 bg-stone-200 rounded-full mx-auto mt-3 mb-5" />
 
-            <!-- Header: cover + title -->
+            <!-- Header: cover + title + author -->
             <div class="flex gap-3 px-5 mb-4 items-start">
               <div class="shrink-0">
                 <img
@@ -32,29 +32,23 @@
                 <p class="text-[11px] text-stone-400 uppercase tracking-widest mb-1 truncate">
                   {{ quote.book }}
                 </p>
+                <p v-if="quote.author" class="text-[12px] text-stone-400 italic truncate">
+                  {{ quote.author }}<span v-if="pubYear" class="not-italic"> · {{ pubYear }}</span>
+                </p>
                 <p
                   v-if="quote.bookProgress"
-                  class="text-[11px] text-stone-400"
+                  class="text-[11px] text-stone-300 mt-0.5"
                 >{{ quote.bookProgress }}% through book</p>
               </div>
             </div>
 
             <!-- Quote text -->
             <div
-              class="mx-5 mb-2 pl-4 border-l-2 text-stone-800"
+              class="mx-5 mb-5 pl-4 border-l-2 text-stone-800"
               :class="quoteClass"
               v-html="enrichedQuoteText"
             >
             </div>
-
-            <!-- Author attribution -->
-            <p
-              v-if="quote.author"
-              class="mx-5 mb-5 text-right text-[13px] text-stone-400 italic tracking-wide"
-            >
-              — {{ quote.author }}
-            </p>
-            <div v-else class="mb-5" />
 
             <!-- Attached image -->
             <div v-if="attachedImageUrl" class="mx-5 mb-5 rounded-xl overflow-hidden border border-stone-100">
@@ -321,6 +315,11 @@ watch(() => props.quote, () => {
 const attachedImageUrl = computed(() => {
   if (!props.quote?.attachedImage || attachedImageError.value) return null
   return chapterImageUrl(props.quote.bookmarkId, props.quote.attachedImage)
+})
+
+const pubYear = computed(() => {
+  if (!props.quote?.volumeId) return ''
+  return store.getPubYear(props.quote.volumeId)
 })
 
 const coverSrc = computed(() => {
