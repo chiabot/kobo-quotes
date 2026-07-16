@@ -247,7 +247,7 @@ export const useQuotesStore = defineStore("quotes", () => {
         bookmarkId: q.bookmark_id || q.BookmarkID || "",
         text: q.text || q.Text || "",
         book: cleanBook(q.book || q.VolumeID || q.title || "Unknown"),
-        volumeId: q.image_url || q.VolumeID || "",
+        volumeId: q.volume_id || q.image_url || q.VolumeID || "",
         author: q.author || q.Author || "",
         date: q.date || q.DateCreated || "",
         color: q.color != null ? q.color : q.Color != null ? q.Color : -1,
