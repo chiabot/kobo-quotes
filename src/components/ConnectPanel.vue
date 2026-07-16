@@ -79,7 +79,7 @@ function handleConnect() {
 }
 
 const DEMO = [
-  { bookmark_id: '1', text: "I must not fear. Fear is the mind-killer.", book: "Dune", author: "Frank Herbert", date: "2024-10-12", color: 0, book_progress: 12, image_url: '' },
+  { bookmark_id: '1', text: "I must not fear. Fear is the mind-killer.", book: "Dune", author: "Frank Herbert", date: "2024-10-12", color: 0, book_progress: 12, image_url: '', tags: ['philo'] },
   { bookmark_id: '2', text: "The mystery of life isn't a problem to solve, but a reality to experience.", book: "Dune", author: "Frank Herbert", date: "2024-10-14", color: 2, book_progress: 34, image_url: '' },
   { bookmark_id: '3', text: "You have power over your mind, not outside events.", book: "Meditations", author: "Marcus Aurelius", date: "2024-11-03", color: 1, book_progress: 8, image_url: '' },
   { bookmark_id: '4', text: "The impediment to action advances action.", book: "Meditations", author: "Marcus Aurelius", date: "2024-11-05", color: 0, book_progress: 45, image_url: '' },

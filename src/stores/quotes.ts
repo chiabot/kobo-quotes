@@ -47,6 +47,7 @@ const STORAGE_KEY = "kobo_quotes_v3";
 const IP_KEY = "kobo_ip_v3";
 const DONE_KEY = "kobo_done_v1";
 const SUBNETS_KEY = "kobo_known_subnets";
+const BOOK_TAGS_KEY = "kobo_book_tags_v1";
 
 const SCAN_SUBNETS = [
   "10.0.0",
@@ -74,6 +75,10 @@ export const useQuotesStore = defineStore("quotes", () => {
   const coverCache = ref<Record<string, string>>({});
   const imageCache = ref<Record<string, string>>({});
   const doneState = ref<Record<string, boolean>>({});
+  const currentView = ref<"quotes" | "books">("quotes");
+  const bookTags = ref<Record<string, string[]>>(
+    (() => { try { return JSON.parse(localStorage.getItem(BOOK_TAGS_KEY) || "{}"); } catch { return {}; } })()
+  );
 
   // ── Getters ────────────────────────────────────────────
   const filtered = computed(() => {
@@ -86,8 +91,11 @@ export const useQuotesStore = defineStore("quotes", () => {
         !sq ||
         q.text.toLowerCase().includes(sq) ||
         q.book.toLowerCase().includes(sq);
-      const tagsMatch = tagsFilter.value.length ? tagsFilter.value.every((t) => q.tags.includes(t as string)) : true;
-      const noTags = noTagsFilter.value ?  q.tags.length === 0 : true;
+      const bTags = bookTags.value[q.book] || [];
+      const tagsMatch = tagsFilter.value.length
+        ? tagsFilter.value.every((t) => q.tags.includes(t as string) || bTags.includes(t as string))
+        : true;
+      const noTags = noTagsFilter.value ? q.tags.length === 0 : true;
 
       const imagesMatch = toggleWithImage.value !== null ? toggleWithImage.value === !!q.attachedImage : true;
       return bookMatch && colorMatch && textMatch && tagsMatch && noTags && imagesMatch;
@@ -125,6 +133,15 @@ export const useQuotesStore = defineStore("quotes", () => {
 
   function toggleImageFilter(toggle: boolean | null) {
     toggleWithImage.value = toggle;
+  }
+
+  function getBookTags(bookTitle: string): string[] {
+    return bookTags.value[bookTitle] || [];
+  }
+
+  function setBookTags(bookTitle: string, tags: string[]) {
+    bookTags.value = { ...bookTags.value, [bookTitle]: tags };
+    localStorage.setItem(BOOK_TAGS_KEY, JSON.stringify(bookTags.value));
   }
 
   function getBaseUrl(): string {
@@ -176,6 +193,7 @@ export const useQuotesStore = defineStore("quotes", () => {
   const allTags = computed(() => {
     const set = new Set<string>();
     allQuotes.value.forEach((q) => q.tags.forEach((t) => set.add(t)));
+    Object.values(bookTags.value).forEach((tags) => tags.forEach((t) => set.add(t)));
     return [...set].sort();
   });
 
@@ -535,6 +553,10 @@ export const useQuotesStore = defineStore("quotes", () => {
     setTagsFilter,
     setNoTagsFilter,
     toggleImageFilter,
+    currentView,
+    bookTags,
+    getBookTags,
+    setBookTags,
     COLOR_MAP,
     COLOR_NAMES,
     IP_SUFFIX,

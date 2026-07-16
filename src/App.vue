@@ -29,30 +29,34 @@
 
     <!-- Main content -->
     <template v-else>
-      <TopBar />
+      <BooksView v-if="store.currentView === 'books'" />
 
-      <!-- Quotes list -->
-      <div class="px-4 pt-3 flex flex-col gap-2.5">
-        <TransitionGroup name="list">
-          <QuoteCard
-            v-for="(quote, idx) in visibleQuotes"
-            :key="quote.bookmarkId || quote.id"
-            :quote="quote"
-            :idx="idx"
-            :search-query="store.searchQuery"
-            @open="openModal(quote)"
-            @group-view="openGroupView"
-          />
-        </TransitionGroup>
+      <template v-else>
+        <TopBar />
 
-        <!-- Empty state -->
-        <div
-          v-if="visibleQuotes.length === 0"
-          class="text-center py-16 text-stone-400 text-[15px] leading-relaxed"
-        >
-          No quotes found.<br>Try a different search.
+        <!-- Quotes list -->
+        <div class="px-4 pt-3 flex flex-col gap-2.5">
+          <TransitionGroup name="list">
+            <QuoteCard
+              v-for="(quote, idx) in visibleQuotes"
+              :key="quote.bookmarkId || quote.id"
+              :quote="quote"
+              :idx="idx"
+              :search-query="store.searchQuery"
+              @open="openModal(quote)"
+              @group-view="openGroupView"
+            />
+          </TransitionGroup>
+
+          <!-- Empty state -->
+          <div
+            v-if="visibleQuotes.length === 0"
+            class="text-center py-16 text-stone-400 text-[15px] leading-relaxed"
+          >
+            No quotes found.<br>Try a different search.
+          </div>
         </div>
-      </div>
+      </template>
     </template>
 
     <!-- Modal -->
@@ -80,6 +84,7 @@ import { useQuotesStore, type Quote } from '@/stores/quotes.ts'
 import { useGroupsStore } from '@/stores/groups.ts'
 import ConnectPanel from '@/components/ConnectPanel.vue'
 import TopBar from '@/components/TopBar.vue'
+import BooksView from '@/components/BooksView.vue'
 import QuoteCard from '@/components/QuoteCard.vue'
 import QuoteModal from '@/components/QuoteModal.vue'
 import GroupPickerModal from '@/components/GroupPickerModal.vue'

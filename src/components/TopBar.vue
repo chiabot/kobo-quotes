@@ -4,9 +4,14 @@
     <!-- Title row -->
     <div class="flex items-center justify-between px-4 pt-4 pb-3">
       <span class="font-serif text-[22px] font-medium tracking-tight text-stone-900">Kobo Quotes</span>
-      <span class="text-[12px] text-stone-400 bg-stone-100 rounded-full px-3 py-1">
-        {{ store.filtered.length }} {{ store.filtered.length === 1 ? 'quote' : 'quotes' }}
-      </span>
+      <div class="flex items-center gap-1.5">
+        <span class="text-[12px] text-stone-400 bg-stone-100 rounded-full px-3 py-1">
+          {{ store.filtered.length }} {{ store.filtered.length === 1 ? 'quote' : 'quotes' }}
+        </span>
+        <button class="text-[12px] text-stone-400 bg-stone-100 rounded-full px-3 py-1 active:bg-stone-200" @click="store.currentView = 'books'">
+          {{ store.books.length }} {{ store.books.length === 1 ? 'book' : 'books' }}
+        </button>
+      </div>
     </div>
 
     <!-- Search -->
