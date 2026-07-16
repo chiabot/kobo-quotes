@@ -148,8 +148,9 @@
               >{{ copied ? 'Copied!' : 'Copy quote' }}</button>
               <button
                 class="flex-1 bg-stone-100 text-stone-600 rounded-xl text-[15px] py-3.5 active:opacity-80"
-                @click="emit('close')"
-              >Close</button>
+                :disabled="sharing"
+                @click="share"
+              >{{ sharing ? 'Generating…' : 'Share' }}</button>
             </div>
 
             <!-- Prev / Next navigation -->
@@ -178,6 +179,7 @@
 import { ref, computed, watch } from 'vue'
 import { useQuotesStore, type Quote } from '@/stores/quotes'
 import { useQuoteContext } from '@/composables/UseQuoteContext.ts'
+import { useShareCard } from '@/composables/useShareCard'
 import GroupSection from '@/components/GroupSection.vue'
 import ContextTab from '@/components/ContextTab.vue'
 import ImagesTab from '@/components/ImagesTab.vue'
@@ -277,9 +279,11 @@ const enrichedQuoteText = computed(() => {
 
 const store = useQuotesStore()
 const { chapterImageUrl } = useQuoteContext()
+const { shareQuote } = useShareCard()
 const copied = ref(false)
 const coverError = ref(false)
 const attachedImageError = ref(false)
+const sharing = ref(false)
 
 // ── Edit mode + tabs ─────────────────────────────────────
 const editMode = ref(false)
@@ -364,6 +368,16 @@ async function copy() {
   await navigator.clipboard.writeText(`"${props.quote.text}"\n— ${props.quote.book}`)
   copied.value = true
   setTimeout(() => (copied.value = false), 1500)
+}
+
+async function share() {
+  if (!props.quote || sharing.value) return
+  sharing.value = true
+  try {
+    await shareQuote(props.quote)
+  } finally {
+    sharing.value = false
+  }
 }
 
 async function reassign(color: number) {
