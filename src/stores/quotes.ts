@@ -47,6 +47,7 @@ const STORAGE_KEY = "kobo_quotes_v3";
 const IP_KEY = "kobo_ip_v3";
 const DONE_KEY = "kobo_done_v1";
 const SUBNETS_KEY = "kobo_known_subnets";
+const BOOK_TAGS_KEY = "kobo_book_tags_v1";
 
 const SCAN_SUBNETS = [
   "10.0.0",
@@ -74,6 +75,10 @@ export const useQuotesStore = defineStore("quotes", () => {
   const coverCache = ref<Record<string, string>>({});
   const imageCache = ref<Record<string, string>>({});
   const doneState = ref<Record<string, boolean>>({});
+  const currentView = ref<"quotes" | "books">("quotes");
+  const bookTags = ref<Record<string, string[]>>(
+    (() => { try { return JSON.parse(localStorage.getItem(BOOK_TAGS_KEY) || "{}"); } catch { return {}; } })()
+  );
 
   // ── Getters ────────────────────────────────────────────
   const filtered = computed(() => {
@@ -188,8 +193,18 @@ export const useQuotesStore = defineStore("quotes", () => {
   const allTags = computed(() => {
     const set = new Set<string>();
     allQuotes.value.forEach((q) => q.tags.forEach((t) => set.add(t)));
+    Object.values(bookTags.value).forEach((tags) => tags.forEach((t) => set.add(t)));
     return [...set].sort();
   });
+
+  function getBookTags(bookTitle: string): string[] {
+    return bookTags.value[bookTitle] || [];
+  }
+
+  function setBookTags(bookTitle: string, tags: string[]) {
+    bookTags.value = { ...bookTags.value, [bookTitle]: tags };
+    localStorage.setItem(BOOK_TAGS_KEY, JSON.stringify(bookTags.value));
+  }
 
   // ── Books metadata (pub year, book-level tags) ──────────
   interface BookMeta {
@@ -580,6 +595,10 @@ export const useQuotesStore = defineStore("quotes", () => {
     toggleDone,
     isDone,
     updateColor,
+    currentView,
+    bookTags,
+    getBookTags,
+    setBookTags,
     getCachedCover,
     getCachedImage,
     setImageCache,
