@@ -78,7 +78,13 @@ export const useQuotesStore = defineStore("quotes", () => {
   const doneState = ref<Record<string, boolean>>({});
   const currentView = ref<"quotes" | "books">("quotes");
   const bookTags = ref<Record<string, string[]>>(
-    (() => { try { return JSON.parse(localStorage.getItem(BOOK_TAGS_KEY) || "{}"); } catch { return {}; } })()
+    (() => {
+      try {
+        return JSON.parse(localStorage.getItem(BOOK_TAGS_KEY) || "{}");
+      } catch {
+        return {};
+      }
+    })(),
   );
 
   // ── Getters ────────────────────────────────────────────
@@ -92,10 +98,11 @@ export const useQuotesStore = defineStore("quotes", () => {
         !sq ||
         q.text.toLowerCase().includes(sq) ||
         q.book.toLowerCase().includes(sq);
+      const effectiveTags = [...q.tags, ...getBookTags(q.book)];
       const tagsMatch = tagsFilter.value.length
-        ? tagsFilter.value.every((t) => q.tags.includes(t as string))
+        ? tagsFilter.value.every((t) => effectiveTags.includes(t as string))
         : true;
-      const noTags = noTagsFilter.value ? q.tags.length === 0 : true;
+      const noTags = noTagsFilter.value ? effectiveTags.length === 0 : true;
 
       const imagesMatch =
         toggleWithImage.value !== null
@@ -194,7 +201,9 @@ export const useQuotesStore = defineStore("quotes", () => {
   const allTags = computed(() => {
     const set = new Set<string>();
     allQuotes.value.forEach((q) => q.tags.forEach((t) => set.add(t)));
-    Object.values(bookTags.value).forEach((tags) => tags.forEach((t) => set.add(t)));
+    Object.values(bookTags.value).forEach((tags) =>
+      tags.forEach((t) => set.add(t)),
+    );
     return [...set].sort();
   });
 
