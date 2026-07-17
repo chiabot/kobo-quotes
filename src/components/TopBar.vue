@@ -72,6 +72,7 @@
             v-if="bookOpen"
             class="fixed z-50 bg-white border border-stone-200 rounded-2xl shadow-xl overflow-hidden"
             :style="bookDropdownStyle"
+            @click.stop
           >
             <div class="overflow-y-auto max-h-[60vh]">
               <!-- All books -->
