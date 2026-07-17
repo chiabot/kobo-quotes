@@ -48,6 +48,7 @@ const IP_KEY = "kobo_ip_v3";
 const DONE_KEY = "kobo_done_v1";
 const SUBNETS_KEY = "kobo_known_subnets";
 const BOOK_TAGS_KEY = "kobo_book_tags_v1";
+const BOOKS_META_KEY = "kobo_book_meta_v1";
 
 const SCAN_SUBNETS = [
   "10.0.0",
@@ -230,6 +231,7 @@ export const useQuotesStore = defineStore("quotes", () => {
         }
       }
       booksMeta.value = map;
+      localStorage.setItem(BOOKS_META_KEY, JSON.stringify(map));
     } catch {}
   }
 
